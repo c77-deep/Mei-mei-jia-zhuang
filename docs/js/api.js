@@ -5,6 +5,34 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
     ? 'http://localhost:8080/api'
     : 'https://meijia-home-production.up.railway.app/api';
 
+// 快速体验功能 - 自动创建临时用户
+function quickLogin() {
+    let user = getUser();
+    if (!user) {
+        // 创建临时用户
+        const tempUser = {
+            username: 'temp_' + Date.now(),
+            nickname: '体验用户',
+            phone: ''
+        };
+        const token = 'quick_token_' + Date.now();
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(tempUser));
+        
+        // 保存到用户列表
+        const users = localDB.getUsers();
+        users.push({
+            ...tempUser,
+            password: 'temp123',
+            createTime: new Date().toISOString()
+        });
+        localDB.saveUsers(users);
+        
+        return tempUser;
+    }
+    return user;
+}
+
 // 本地存储数据管理
 const localDB = {
     getProducts() {

@@ -127,10 +127,10 @@
         }
 
         async function submitDemand() {
+            // 如果未登录，自动创建临时用户
             if (!isLoggedIn()) {
-                showToast('请先登录');
-                setTimeout(() => window.location.href = 'login.html', 1000);
-                return;
+                quickLogin();
+                showToast('已为您创建体验账号');
             }
 
             const houseType = getSelectedTags('houseType');

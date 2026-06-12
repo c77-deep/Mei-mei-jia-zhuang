@@ -136,6 +136,11 @@
     <script src="../js/api.js"></script>
     <script>
         function renderProfile() {
+            // 如果未登录，自动创建临时用户
+            if (!isLoggedIn()) {
+                quickLogin();
+            }
+            
             const user = getUser();
             if (!user) return;
 

@@ -247,9 +247,14 @@
                 btn.textContent = user.nickname || user.username;
                 btn.href = 'pages/profile.html';
             } else {
-                btn.textContent = '登录';
-                btn.href = 'pages/login.html';
+                btn.textContent = '快速体验';
+                btn.href = 'pages/profile.html';
             }
+        }
+
+        // 页面加载时自动创建临时用户
+        if (!isLoggedIn()) {
+            quickLogin();
         }
 
         loadHotProducts();
