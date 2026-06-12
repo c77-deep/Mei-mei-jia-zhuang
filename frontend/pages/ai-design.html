@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能设计 - 美家家装</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .ai-page {
+            background: linear-gradient(135deg, var(--primary), #ff8c00);
+            min-height: 100vh;
+            padding-bottom: 30px;
+        }
+        .ai-header {
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .ai-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .ai-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .ai-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .ai-desc {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .feature-item {
+            padding: 20px;
+            background: var(--primary-light);
+            border-radius: 15px;
+        }
+        .feature-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 80, 0, 0.4);
+            transition: 0.3s;
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 80, 0, 0.6);
+        }
+        .demo-result {
+            background: linear-gradient(135deg, #fff5f0, #ffe5d5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .demo-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .demo-item {
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        .demo-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="ai-page">
+        <div class="ai-header">
+            <a href="../index.html" style="color:white;text-decoration:none;position:absolute;left:20px;">← 返回</a>
+            <h2>🤖 AI智能设计</h2>
+        </div>
+
+        <div class="ai-card">
+            <div class="ai-icon">🏠✨</div>
+            <div class="ai-title">AI家装设计助手</div>
+            <div class="ai-desc">只需上传户型图，AI将在30秒内为您生成3套专业装修方案，包含效果图、材料清单和精准报价</div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div style="font-weight:bold;">30秒出图</div>
+                    <div style="font-size:12px;color:var(--text-lighter);">极速生成方案</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div style="font-weight:bold;">智能匹配</div>
+                    <div style="font-size:12px;color:var(--text-lighter);">基于户型推荐</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div style="font-weight:bold;">精准报价</div>
+                    <div style="font-size:12px;color:var(--text-lighter);">预算可控</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div style="font-weight:bold;">多风格</div>
+                    <div style="font-size:12px;color:var(--text-lighter);">任意切换</div>
+                </div>
+            </div>
+
+            <div style="text-align:left;">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>上传户型图（支持拍照或相册）</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>选择喜欢的装修风格和预算</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>AI生成3套专属方案供您选择</div>
+                </div>
+            </div>
+
+            <div class="demo-result">
+                <div class="demo-title">📋 方案预览示例</div>
+                <div class="demo-item">🎨 风格：现代简约风</div>
+                <div class="demo-item">🏠 户型：三室两厅 | 120㎡</div>
+                <div class="demo-item">💰 预算：18-22万</div>
+                <div class="demo-item">⏰ 工期：60天</div>
+                <div class="demo-item">📦 包含：3D效果图 + 材料清单 + 施工方案</div>
+            </div>
+
+            <button class="start-btn" onclick="startDesign()">🚀 立即开始设计</button>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        function startDesign() {
+            if (!isLoggedIn()) {
+                showToast('请先登录');
+                setTimeout(() => window.location.href = 'login.html', 1000);
+                return;
+            }
+            window.location.href = 'post-demand.html';
+        }
+    </script>
+</body>
+</html>

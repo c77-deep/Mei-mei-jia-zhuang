@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情 - 美家家装</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .product-detail-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+        .detail-info {
+            background: white;
+            padding: 20px;
+        }
+        .detail-price {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .detail-price::before {
+            content: '¥';
+            font-size: 16px;
+        }
+        .detail-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .detail-meta {
+            display: flex;
+            gap: 20px;
+            color: var(--text-lighter);
+            font-size: 14px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-desc {
+            padding: 20px;
+            background: white;
+            margin-top: 10px;
+        }
+        .detail-desc-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .detail-desc-content {
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            padding: 10px 15px;
+            border-top: 1px solid var(--border);
+            gap: 10px;
+            z-index: 100;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+        }
+        .action-cart {
+            background: #ff9800;
+            color: white;
+        }
+        .action-buy {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="products.html" class="header-back">← 返回</a>
+        <div class="header-title">商品详情</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div id="productDetail">
+        <div class="loading">加载中</div>
+    </div>
+
+    <div class="action-bar">
+        <button class="action-btn action-cart" onclick="addToCart()">加入购物车</button>
+        <button class="action-btn action-buy" onclick="buyNow()">立即购买</button>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        let product = null;
+
+        async function loadProduct() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                window.location.href = 'products.html';
+                return;
+            }
+
+            const result = await api.getProductDetail(id);
+            if (result.success) {
+                product = result.data;
+                renderProduct();
+            } else {
+                document.getElementById('productDetail').innerHTML = '<div class="empty-state"><div class="empty-icon">😕</div><p>商品不存在</p></div>';
+            }
+        }
+
+        function renderProduct() {
+            document.getElementById('productDetail').innerHTML = `
+                <div class="product-detail-image">${getCategoryIcon(product.category)}</div>
+                <div class="detail-info">
+                    <div class="detail-price">${product.price}</div>
+                    <div class="detail-name">${product.name}</div>
+                    <div class="detail-meta">
+                        <span>品牌：${product.brand}</span>
+                        <span>销量：${product.sales}</span>
+                        <span>评分：${product.rating}</span>
+                    </div>
+                </div>
+                <div class="detail-desc">
+                    <div class="detail-desc-title">商品详情</div>
+                    <div class="detail-desc-content">${product.description || '暂无详细描述'}</div>
+                </div>
+                <div style="height: 80px;"></div>
+            `;
+        }
+
+        function addToCart() {
+            if (!isLoggedIn()) {
+                showToast('请先登录');
+                setTimeout(() => window.location.href = 'login.html', 1000);
+                return;
+            }
+            showToast('已加入购物车');
+        }
+
+        function buyNow() {
+            if (!isLoggedIn()) {
+                showToast('请先登录');
+                setTimeout(() => window.location.href = 'login.html', 1000);
+                return;
+            }
+            if (confirm(`确认购买 ${product.name}？`)) {
+                placeOrder();
+            }
+        }
+
+        async function placeOrder() {
+            const result = await api.createOrder({
+                productId: product.id,
+                quantity: 1,
+                address: '待填写',
+                receiver: getUser().nickname,
+                phone: getUser().phone
+            });
+
+            if (result.success) {
+                showToast('下单成功！');
+                setTimeout(() => window.location.href = 'orders.html', 1500);
+            } else {
+                showToast(result.message || '下单失败');
+            }
+        }
+
+        loadProduct();
+    </script>
+</body>
+</html>

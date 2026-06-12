@@ -1,0 +1,17 @@
+﻿# Backend
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/data/
+backend/*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/

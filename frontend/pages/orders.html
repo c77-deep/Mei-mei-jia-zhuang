@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - 美家家装</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            margin: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .order-no {
+            font-size: 13px;
+            color: var(--text-lighter);
+        }
+        .order-status {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .order-status.pending { color: var(--warning); }
+        .order-status.paid { color: var(--success); }
+        .order-content {
+            display: flex;
+            gap: 15px;
+        }
+        .order-image {
+            width: 80px;
+            height: 80px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        .order-info {
+            flex: 1;
+        }
+        .order-name {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        .order-price {
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .order-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="header-back">← 返回</a>
+        <div class="header-title">我的订单</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="filterOrders('')">全部</div>
+        <div class="tab" onclick="filterOrders('pending')">待付款</div>
+        <div class="tab" onclick="filterOrders('paid')">已付款</div>
+    </div>
+
+    <div id="orderList">
+        <div class="loading">加载中</div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="products.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="orders.html" class="nav-item active">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        let currentStatus = '';
+
+        async function loadOrders() {
+            if (!isLoggedIn()) {
+                document.getElementById('orderList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>请先登录查看订单</p>
+                        <a href="login.html" class="btn btn-primary btn-sm mt-20">去登录</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const result = await api.getOrders(currentStatus);
+            const container = document.getElementById('orderList');
+
+            if (result.success && result.data.length > 0) {
+                container.innerHTML = result.data.map(order => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-no">订单号：${order.orderNo}</span>
+                            <span class="order-status ${order.status}">${getStatusText(order.status)}</span>
+                        </div>
+                        <div class="order-content">
+                            <div class="order-image">📦</div>
+                            <div class="order-info">
+                                <div class="order-name">装修材料订单</div>
+                                <div style="color:var(--text-lighter);font-size:13px;">数量：${order.quantity}</div>
+                                <div class="order-price">${formatPrice(order.totalPrice)}</div>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            ${order.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="payOrder('${order.orderNo}')">去付款</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>暂无订单</p>
+                        <a href="products.html" class="btn btn-primary btn-sm mt-20">去逛逛</a>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'pending': '待付款',
+                'paid': '已付款',
+                'shipped': '已发货',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+            return map[status] || status;
+        }
+
+        function filterOrders(status) {
+            currentStatus = status;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadOrders();
+        }
+
+        async function payOrder(orderNo) {
+            if (confirm('确认支付？')) {
+                const result = await api.payOrder(orderNo);
+                if (result.success) {
+                    showToast('支付成功');
+                    loadOrders();
+                } else {
+                    showToast(result.message);
+                }
+            }
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>

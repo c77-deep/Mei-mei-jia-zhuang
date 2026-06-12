@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美家家装 - 首页</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">🏠 美家家装</div>
+        <div>
+            <a href="pages/login.html" class="header-back" id="userBtn">登录</a>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="搜索装修材料、设计师...">
+        <button class="search-btn" onclick="search()">搜索</button>
+    </div>
+
+    <div class="banner">
+        <h2>AI智能设计</h2>
+        <p>上传户型图，30秒生成3套装修方案</p>
+        <a href="pages/ai-design.html" class="btn btn-outline btn-sm mt-10">立即体验</a>
+    </div>
+
+    <div class="category-grid">
+        <a href="pages/products.html?category=瓷砖" class="category-item">
+            <span class="category-icon">🧱</span>
+            <span class="category-name">瓷砖地板</span>
+        </a>
+        <a href="pages/products.html?category=卫浴" class="category-item">
+            <span class="category-icon">🚿</span>
+            <span class="category-name">卫浴洁具</span>
+        </a>
+        <a href="pages/products.html?category=灯具" class="category-item">
+            <span class="category-icon">💡</span>
+            <span class="category-name">灯具照明</span>
+        </a>
+        <a href="pages/products.html?category=定制" class="category-item">
+            <span class="category-icon">🚪</span>
+            <span class="category-name">全屋定制</span>
+        </a>
+        <a href="pages/products.html?category=涂料" class="category-item">
+            <span class="category-icon">🎨</span>
+            <span class="category-name">墙面涂料</span>
+        </a>
+        <a href="pages/products.html?category=门窗" class="category-item">
+            <span class="category-icon">🚪</span>
+            <span class="category-name">门锁门窗</span>
+        </a>
+        <a href="pages/products.html?category=地板" class="category-item">
+            <span class="category-icon">🪵</span>
+            <span class="category-name">木地板</span>
+        </a>
+        <a href="pages/products.html?category=厨电" class="category-item">
+            <span class="category-icon">🍳</span>
+            <span class="category-name">厨房电器</span>
+        </a>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🔥 热门推荐</div>
+        <div class="product-grid" id="hotProducts">
+            <div class="loading">加载中</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🚀 快捷功能</div>
+        <div class="category-grid">
+            <a href="pages/post-demand.html" class="category-item">
+                <span class="category-icon">📝</span>
+                <span class="category-name">发布需求</span>
+            </a>
+            <a href="pages/find-designer.html" class="category-item">
+                <span class="category-icon">👨‍🎨</span>
+                <span class="category-name">找设计师</span>
+            </a>
+            <a href="pages/calculator.html" class="category-item">
+                <span class="category-icon">🧮</span>
+                <span class="category-name">预算计算</span>
+            </a>
+            <a href="pages/orders.html" class="category-item">
+                <span class="category-icon">📋</span>
+                <span class="category-name">我的订单</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="pages/products.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="pages/post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="pages/orders.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="pages/profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        async function loadHotProducts() {
+            const result = await api.getHotProducts();
+            const container = document.getElementById('hotProducts');
+
+            if (result.success && result.data.length > 0) {
+                container.innerHTML = result.data.slice(0, 8).map(p => `
+                    <a href="pages/product-detail.html?id=${p.id}" class="product-card" style="text-decoration:none;color:inherit;">
+                        <div class="product-image">${getCategoryIcon(p.category)}</div>
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">${p.price}</div>
+                            <div class="product-meta">
+                                <span>${p.brand}</span>
+                                <span>${p.sales}人付款</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>暂无商品</p></div>';
+            }
+        }
+
+        function search() {
+            const keyword = document.getElementById('searchInput').value;
+            if (keyword) {
+                window.location.href = `pages/products.html?keyword=${encodeURIComponent(keyword)}`;
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
+        function updateUserBtn() {
+            const btn = document.getElementById('userBtn');
+            const user = getUser();
+            if (user) {
+                btn.textContent = user.nickname || user.username;
+                btn.href = 'pages/profile.html';
+            }
+        }
+
+        loadHotProducts();
+        updateUserBtn();
+        api.initData();
+    </script>
+</body>
+</html>

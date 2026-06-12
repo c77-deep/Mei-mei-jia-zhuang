@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>材料商城 - 美家家装</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="header">
+        <a href="../index.html" class="header-back">← 返回</a>
+        <div class="header-title">材料商城</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="搜索材料...">
+        <button class="search-btn" onclick="search()">搜索</button>
+    </div>
+
+    <div class="tabs" id="categoryTabs">
+        <div class="tab active" onclick="filterCategory('')">全部</div>
+        <div class="tab" onclick="filterCategory('瓷砖')">瓷砖</div>
+        <div class="tab" onclick="filterCategory('卫浴')">卫浴</div>
+        <div class="tab" onclick="filterCategory('灯具')">灯具</div>
+        <div class="tab" onclick="filterCategory('定制')">定制</div>
+        <div class="tab" onclick="filterCategory('涂料')">涂料</div>
+        <div class="tab" onclick="filterCategory('门窗')">门窗</div>
+        <div class="tab" onclick="filterCategory('地板')">地板</div>
+        <div class="tab" onclick="filterCategory('厨电')">厨电</div>
+    </div>
+
+    <div class="product-grid p-15" id="productList">
+        <div class="loading">加载中</div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="products.html" class="nav-item active">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="orders.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        let currentCategory = '';
+        let currentKeyword = '';
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            currentCategory = params.get('category') || '';
+            currentKeyword = params.get('keyword') || '';
+
+            if (currentCategory) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => {
+                    if (t.textContent === currentCategory) t.classList.add('active');
+                });
+            }
+
+            if (currentKeyword) {
+                document.getElementById('searchInput').value = currentKeyword;
+            }
+        }
+
+        async function loadProducts() {
+            const result = await api.getProducts(currentCategory, currentKeyword);
+            const container = document.getElementById('productList');
+
+            if (result.success && result.data.length > 0) {
+                container.innerHTML = result.data.map(p => `
+                    <a href="product-detail.html?id=${p.id}" class="product-card" style="text-decoration:none;color:inherit;">
+                        <div class="product-image">${getCategoryIcon(p.category)}</div>
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">${p.price}</div>
+                            <div class="product-meta">
+                                <span>${p.brand}</span>
+                                <span>${p.sales}人付款</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🔍</div><p>暂无相关商品</p></div>';
+            }
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadProducts();
+        }
+
+        function search() {
+            currentKeyword = document.getElementById('searchInput').value;
+            currentCategory = '';
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab').classList.add('active');
+            loadProducts();
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
+        getUrlParams();
+        loadProducts();
+    </script>
+</body>
+</html>
