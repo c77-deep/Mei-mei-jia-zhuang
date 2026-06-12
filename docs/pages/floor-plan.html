@@ -3,515 +3,1382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- SEO Meta Tags -->
     <title>户型设计 - 美家家装 | AI智能户型分析</title>
     <meta name="description" content="上传户型图，AI智能分析户型结构，自动生成装修方案。支持多种户型模板，一键生成3D效果图。">
     <meta name="keywords" content="户型设计,户型图,AI设计,装修方案,3D效果图">
-    
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#ff5000">
+    <style>
+        /* ===== 页面主布局 ===== */
+        .fp-page { background: var(--bg); min-height: 100vh; padding-bottom: 70px; }
+        .fp-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 56px; z-index: 99; }
+        .fp-tab { flex: 1; padding: 14px 0; text-align: center; font-size: 14px; color: var(--text-light); cursor: pointer; border-bottom: 3px solid transparent; transition: .3s; }
+        .fp-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+        .fp-section { display: none; }
+        .fp-section.active { display: block; }
+
+        /* ===== 模板选择 ===== */
+        .tpl-filter { display: flex; gap: 8px; padding: 12px 15px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tpl-filter::-webkit-scrollbar { display: none; }
+        .filter-chip { padding: 8px 16px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; background: #fff; border: 1px solid var(--border); transition: .2s; }
+        .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .tpl-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 15px 15px; }
+        .tpl-card { background: #fff; border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: var(--transition); border: 2px solid transparent; }
+        .tpl-card:hover, .tpl-card.selected { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+        .tpl-preview { width: 100%; aspect-ratio: 4/3; background: #fafafa; position: relative; overflow: hidden; }
+        .tpl-preview canvas { width: 100%; height: 100%; }
+        .tpl-badge { position: absolute; top: 8px; right: 8px; padding: 3px 8px; border-radius: 10px; font-size: 11px; color: #fff; }
+        .tpl-badge.hot { background: #ff4d4f; }
+        .tpl-badge.new { background: var(--primary); }
+        .tpl-info { padding: 10px 12px; }
+        .tpl-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .tpl-meta { font-size: 12px; color: var(--text-lighter); display: flex; justify-content: space-between; }
+        .tpl-enter { display: block; margin: 15px; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; width: calc(100% - 30px); cursor: pointer; transition: .3s; }
+        .tpl-enter:active { transform: scale(.97); }
+
+        /* ===== 编辑器布局 ===== */
+        .editor-wrap { display: flex; flex-direction: column; height: calc(100vh - 56px - 50px); }
+        .editor-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #fff; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
+        .editor-toolbar::-webkit-scrollbar { display: none; }
+        .tool-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 10px; border: none; background: none; border-radius: 8px; cursor: pointer; font-size: 11px; color: var(--text-light); white-space: nowrap; transition: .2s; }
+        .tool-btn .icon { font-size: 20px; }
+        .tool-btn.active, .tool-btn:active { background: var(--primary-light); color: var(--primary); }
+        .tool-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+        .editor-canvas-wrap { flex: 1; position: relative; overflow: hidden; background: #f0f0f0; touch-action: none; }
+        #editorCanvas { display: block; width: 100%; height: 100%; }
+        .editor-zoom { position: absolute; bottom: 12px; right: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .zoom-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #fff; box-shadow: var(--shadow); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* ===== 属性面板 ===== */
+        .prop-panel { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,.15); z-index: 150; transform: translateY(100%); transition: transform .3s ease; max-height: 55vh; overflow-y: auto; }
+        .prop-panel.show { transform: translateY(0); }
+        .prop-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 1; }
+        .prop-title { font-size: 16px; font-weight: 700; }
+        .prop-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--bg); font-size: 18px; cursor: pointer; }
+        .prop-body { padding: 16px; }
+        .prop-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+        .prop-label { font-size: 14px; color: var(--text-light); }
+        .prop-value { display: flex; align-items: center; gap: 8px; }
+        .prop-input { width: 80px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; text-align: center; outline: none; }
+        .prop-input:focus { border-color: var(--primary); }
+        .prop-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+        .prop-btn { padding: 8px 16px; border-radius: 20px; border: none; font-size: 13px; cursor: pointer; transition: .2s; }
+        .prop-btn-primary { background: var(--primary); color: #fff; }
+        .prop-btn-danger { background: #fff1f0; color: #ff4d4f; }
+        .prop-actions { display: flex; gap: 10px; padding: 16px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: #fff; }
+
+        /* ===== 家具面板 ===== */
+        .furniture-panel { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,.15); z-index: 150; transform: translateY(100%); transition: transform .3s ease; }
+        .furniture-panel.show { transform: translateY(0); }
+        .furniture-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .furniture-tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text-light); }
+        .furniture-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+        .furniture-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px 16px; max-height: 35vh; overflow-y: auto; }
+        .furniture-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 10px; cursor: pointer; transition: .2s; }
+        .furniture-item:active { background: var(--primary-light); }
+        .furniture-item .f-icon { font-size: 28px; }
+        .furniture-item .f-name { font-size: 11px; color: var(--text-light); }
+
+        /* ===== 上传区域 ===== */
+        .upload-area { border: 3px dashed var(--border); border-radius: var(--radius-lg); padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); background: var(--bg); margin: 15px; }
+        .upload-area:hover, .upload-area.dragover { border-color: var(--primary); background: var(--primary-light); }
+        .upload-icon { font-size: 64px; margin-bottom: 15px; }
+        .upload-text { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+        .upload-hint { font-size: 13px; color: var(--text-lighter); }
+        .upload-options { margin: 0 15px; }
+        .option-group { background: #fff; border-radius: var(--radius); padding: 20px; margin-bottom: 15px; }
+        .option-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; }
+        .preference-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .preference-tag { padding: 10px 18px; background: #fff; border-radius: 25px; font-size: 14px; cursor: pointer; transition: var(--transition); border: 1px solid var(--border); }
+        .preference-tag:hover, .preference-tag.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* ===== 历史记录 ===== */
+        .history-list { padding: 15px; display: grid; gap: 12px; }
+        .history-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
+        .history-item:hover { background: var(--primary-light); }
+        .history-thumb { width: 60px; height: 60px; border-radius: 8px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .history-info { flex: 1; }
+        .history-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+        .history-meta { font-size: 12px; color: var(--text-lighter); }
+        .history-status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .status-done { background: #e6f7e6; color: #52c41a; }
+        .status-ing { background: #fff7e6; color: #faad14; }
+
+        /* ===== 遮罩 ===== */
+        .panel-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.4); z-index: 140; display: none; }
+        .panel-overlay.show { display: block; }
+
+        /* ===== 3D预览提示 ===== */
+        .preview-3d-banner { margin: 15px; padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: var(--radius); color: #fff; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .preview-3d-banner .p3d-icon { font-size: 36px; }
+        .preview-3d-banner .p3d-text { flex: 1; }
+        .preview-3d-banner .p3d-title { font-size: 15px; font-weight: 600; }
+        .preview-3d-banner .p3d-desc { font-size: 12px; opacity: .85; }
+        .preview-3d-banner .p3d-arrow { font-size: 20px; }
+
+        /* ===== 样式选择弹窗 ===== */
+        .style-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+        .style-modal.show { display: flex; }
+        .style-modal-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); }
+        .style-modal-content { position: relative; background: #fff; border-radius: 16px 16px 0 0; width: 100%; max-height: 70vh; overflow-y: auto; padding-bottom: 20px; animation: slideUp .3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .style-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 1; }
+        .style-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+        .style-card { border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: .2s; }
+        .style-card.selected { border-color: var(--primary); }
+        .style-card-preview { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+        .style-card-name { padding: 8px; text-align: center; font-size: 13px; font-weight: 500; background: #fff; }
+
+        /* ===== 户型信息卡片 ===== */
+        .info-card { margin: 15px; background: #fff; border-radius: var(--radius); padding: 16px; }
+        .info-card-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .info-item { text-align: center; padding: 10px; background: var(--bg); border-radius: 10px; }
+        .info-item .val { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .info-item .lbl { font-size: 11px; color: var(--text-lighter); margin-top: 2px; }
+
+        @media (min-width: 768px) {
+            .tpl-list { grid-template-columns: repeat(3, 1fr); }
+            .furniture-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+    </style>
 </head>
 <body>
     <div class="header">
-        <a href="index.html" class="header-back">← 返回</a>
-        <div class="header-title">户型设计</div>
-        <div style="width: 50px;"></div>
+        <a href="../index.html" class="header-back">← 返回</a>
+        <div class="header-title" id="headerTitle">户型设计</div>
+        <div id="headerAction" style="width:50px;"></div>
     </div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('upload')">上传户型图</div>
-        <div class="tab" onclick="switchTab('template')">户型模板</div>
-        <div class="tab" onclick="switchTab('history')">历史记录</div>
+    <div class="fp-tabs" id="mainTabs">
+        <div class="fp-tab active" data-tab="template">选择户型</div>
+        <div class="fp-tab" data-tab="editor">自由设计</div>
+        <div class="fp-tab" data-tab="upload">上传户型</div>
+        <div class="fp-tab" data-tab="history">历史记录</div>
     </div>
 
-    <div class="page-content">
-        <!-- Upload Section -->
-        <div id="upload-section" class="section">
-            <div class="section-title">📤 上传户型图</div>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📷</div>
-                <div class="upload-text">点击或拖拽上传户型图</div>
-                <div class="upload-hint">支持 JPG、PNG、PDF 格式，最大 10MB</div>
-                <input type="file" id="fileInput" accept="image/*,.pdf" style="display: none;">
-            </div>
-            
-            <div class="upload-options">
-                <div class="option-group">
-                    <div class="option-title">🏠 户型信息</div>
-                    <div class="form-group">
-                        <label class="form-label">户型</label>
-                        <select class="form-input" id="roomType">
-                            <option value="">请选择户型</option>
-                            <option value="1室1厅">1室1厅</option>
-                            <option value="2室1厅">2室1厅</option>
-                            <option value="2室2厅">2室2厅</option>
-                            <option value="3室1厅">3室1厅</option>
-                            <option value="3室2厅">3室2厅</option>
-                            <option value="4室2厅">4室2厅</option>
-                            <option value="复式">复式</option>
-                            <option value="别墅">别墅</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">面积 (㎡)</label>
-                        <input type="number" class="form-input" id="area" placeholder="请输入面积">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">装修风格</label>
-                        <select class="form-input" id="style">
-                            <option value="">请选择风格</option>
-                            <option value="现代简约">现代简约</option>
-                            <option value="北欧风格">北欧风格</option>
-                            <option value="新中式">新中式</option>
-                            <option value="轻奢风格">轻奢风格</option>
-                            <option value="美式风格">美式风格</option>
-                            <option value="日式风格">日式风格</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="option-group">
-                    <div class="option-title">🎨 设计偏好</div>
-                    <div class="preference-tags">
-                        <div class="preference-tag" onclick="togglePreference(this)">开放式厨房</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">干湿分离</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">步入式衣帽间</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">书房</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">儿童房</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">老人房</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">储物间</div>
-                        <div class="preference-tag" onclick="togglePreference(this)">阳台花园</div>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="btn btn-primary btn-block mt-20" onclick="startDesign()">
-                🚀 开始AI设计
-            </button>
+    <!-- ==================== 选择户型 ==================== -->
+    <div class="fp-section active" id="sec-template">
+        <div class="tpl-filter" id="tplFilter">
+            <div class="filter-chip active" data-filter="all">全部</div>
+            <div class="filter-chip" data-filter="1室">一居室</div>
+            <div class="filter-chip" data-filter="2室">两居室</div>
+            <div class="filter-chip" data-filter="3室">三居室</div>
+            <div class="filter-chip" data-filter="4室">四居室</div>
+            <div class="filter-chip" data-filter="复式">复式/LOFT</div>
+            <div class="filter-chip" data-filter="别墅">别墅</div>
         </div>
+        <div class="tpl-list" id="tplList"></div>
+        <div id="tplDetail" style="display:none;">
+            <div style="padding:12px 15px 0;">
+                <button onclick="backToList()" style="background:none;border:none;color:var(--primary);font-size:14px;cursor:pointer;padding:8px 0;">← 返回户型列表</button>
+            </div>
+            <div class="info-card" id="tplInfoCard"></div>
+            <div class="preview-3d-banner" onclick="open3DPreview()">
+                <div class="p3d-icon">🏗️</div>
+                <div class="p3d-text">
+                    <div class="p3d-title">3D效果预览</div>
+                    <div class="p3d-desc">基于当前户型一键生成3D漫游</div>
+                </div>
+                <div class="p3d-arrow">›</div>
+            </div>
+            <button class="tpl-enter" onclick="enterEditor()">✏️ 进入自定义设计</button>
+            <button class="tpl-enter" style="background:#fff;color:var(--primary);border:2px solid var(--primary);margin-top:0;" onclick="applyAIStyle()">🤖 AI一键生成方案</button>
+        </div>
+    </div>
 
-        <!-- Template Section -->
-        <div id="template-section" class="section" style="display: none;">
-            <div class="section-title">🏠 户型模板</div>
-            <div class="template-grid">
-                <div class="template-card" onclick="selectTemplate('1室1厅')">
-                    <div class="template-icon">🏢</div>
-                    <div class="template-name">1室1厅</div>
-                    <div class="template-size">60-80㎡</div>
-                    <div class="template-desc">适合单身或情侣</div>
-                </div>
-                <div class="template-card" onclick="selectTemplate('2室1厅')">
-                    <div class="template-icon">🏠</div>
-                    <div class="template-name">2室1厅</div>
-                    <div class="template-size">80-100㎡</div>
-                    <div class="template-desc">适合小家庭</div>
-                </div>
-                <div class="template-card" onclick="selectTemplate('3室2厅')">
-                    <div class="template-icon">🏡</div>
-                    <div class="template-name">3室2厅</div>
-                    <div class="template-size">100-130㎡</div>
-                    <div class="template-desc">适合三代同堂</div>
-                </div>
-                <div class="template-card" onclick="selectTemplate('复式')">
-                    <div class="template-icon">🏘️</div>
-                    <div class="template-name">复式</div>
-                    <div class="template-size">150-200㎡</div>
-                    <div class="template-desc">上下两层空间</div>
-                </div>
-                <div class="template-card" onclick="selectTemplate('别墅')">
-                    <div class="template-icon">🏰</div>
-                    <div class="template-name">别墅</div>
-                    <div class="template-size">200㎡+</div>
-                    <div class="template-desc">独立庭院空间</div>
-                </div>
-                <div class="template-card" onclick="selectTemplate('loft')">
-                    <div class="template-icon">🏗️</div>
-                    <div class="template-name">LOFT</div>
-                    <div class="template-size">40-60㎡</div>
-                    <div class="template-desc">挑高空间设计</div>
+    <!-- ==================== 自由设计编辑器 ==================== -->
+    <div class="fp-section" id="sec-editor">
+        <div class="editor-wrap">
+            <div class="editor-toolbar" id="editorToolbar">
+                <button class="tool-btn active" data-tool="select" onclick="setTool('select')"><span class="icon">👆</span>选择</button>
+                <button class="tool-btn" data-tool="wall" onclick="setTool('wall')"><span class="icon">🧱</span>画墙</button>
+                <button class="tool-btn" data-tool="room" onclick="setTool('room')"><span class="icon">⬜</span>画房间</button>
+                <button class="tool-btn" data-tool="door" onclick="setTool('door')"><span class="icon">🚪</span>门</button>
+                <button class="tool-btn" data-tool="window" onclick="setTool('window')"><span class="icon">🪟</span>窗</button>
+                <div class="tool-sep"></div>
+                <button class="tool-btn" data-tool="furniture" onclick="toggleFurniturePanel()"><span class="icon">🛋️</span>家具</button>
+                <button class="tool-btn" data-tool="text" onclick="setTool('text')"><span class="icon">📝</span>文字</button>
+                <div class="tool-sep"></div>
+                <button class="tool-btn" onclick="editorUndo()"><span class="icon">↩️</span>撤销</button>
+                <button class="tool-btn" onclick="editorRedo()"><span class="icon">↪️</span>重做</button>
+                <button class="tool-btn" onclick="editorClear()"><span class="icon">🗑️</span>清空</button>
+            </div>
+            <div class="editor-canvas-wrap" id="canvasWrap">
+                <canvas id="editorCanvas"></canvas>
+                <div class="editor-zoom">
+                    <button class="zoom-btn" onclick="editorZoom(1.2)">+</button>
+                    <button class="zoom-btn" onclick="editorZoom(0.8)">−</button>
+                    <button class="zoom-btn" onclick="editorFit()" style="font-size:14px;">⊡</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- History Section -->
-        <div id="history-section" class="section" style="display: none;">
-            <div class="section-title">📋 历史记录</div>
-            <div class="history-list">
-                <div class="history-item">
-                    <div class="history-icon">📐</div>
-                    <div class="history-info">
-                        <div class="history-title">3室2厅 - 现代简约</div>
-                        <div class="history-meta">120㎡ | 2024-01-15</div>
-                    </div>
-                    <div class="history-status">已完成</div>
+    <!-- ==================== 上传户型 ==================== -->
+    <div class="fp-section" id="sec-upload">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">点击或拖拽上传户型图</div>
+            <div class="upload-hint">支持 JPG、PNG、PDF 格式，最大 10MB</div>
+            <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none;">
+        </div>
+        <div class="upload-options">
+            <div class="option-group">
+                <div class="option-title">🏠 户型信息</div>
+                <div class="form-group">
+                    <label class="form-label">户型</label>
+                    <select class="form-input" id="roomType">
+                        <option value="">请选择户型</option>
+                        <option value="1室1厅">1室1厅</option>
+                        <option value="2室1厅">2室1厅</option>
+                        <option value="2室2厅">2室2厅</option>
+                        <option value="3室1厅">3室1厅</option>
+                        <option value="3室2厅">3室2厅</option>
+                        <option value="4室2厅">4室2厅</option>
+                        <option value="复式">复式</option>
+                        <option value="别墅">别墅</option>
+                    </select>
                 </div>
-                <div class="history-item">
-                    <div class="history-icon">📐</div>
-                    <div class="history-info">
-                        <div class="history-title">2室1厅 - 北欧风格</div>
-                        <div class="history-meta">85㎡ | 2024-01-10</div>
-                    </div>
-                    <div class="history-status">设计中</div>
+                <div class="form-group">
+                    <label class="form-label">面积 (㎡)</label>
+                    <input type="number" class="form-input" id="areaInput" placeholder="请输入面积">
                 </div>
-                <div class="history-empty">
-                    <div class="empty-icon">📭</div>
-                    <p>暂无更多历史记录</p>
+                <div class="form-group">
+                    <label class="form-label">装修风格</label>
+                    <select class="form-input" id="styleSelect">
+                        <option value="">请选择风格</option>
+                        <option value="现代简约">现代简约</option>
+                        <option value="北欧风格">北欧风格</option>
+                        <option value="新中式">新中式</option>
+                        <option value="轻奢风格">轻奢风格</option>
+                        <option value="美式风格">美式风格</option>
+                        <option value="日式风格">日式风格</option>
+                    </select>
                 </div>
             </div>
+            <div class="option-group">
+                <div class="option-title">🎨 设计偏好</div>
+                <div class="preference-tags">
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">开放式厨房</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">干湿分离</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">步入式衣帽间</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">书房</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">儿童房</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">老人房</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">储物间</div>
+                    <div class="preference-tag" onclick="this.classList.toggle('active')">阳台花园</div>
+                </div>
+            </div>
+        </div>
+        <button class="tpl-enter" onclick="startUploadDesign()">🚀 开始AI设计</button>
+    </div>
+
+    <!-- ==================== 历史记录 ==================== -->
+    <div class="fp-section" id="sec-history">
+        <div class="history-list" id="historyList">
+            <div class="history-item" onclick="loadHistory(0)">
+                <div class="history-thumb">📐</div>
+                <div class="history-info">
+                    <div class="history-title">3室2厅 · 现代简约</div>
+                    <div class="history-meta">120㎡ · 2024-01-15</div>
+                </div>
+                <span class="history-status status-done">已完成</span>
+            </div>
+            <div class="history-item" onclick="loadHistory(1)">
+                <div class="history-thumb">📐</div>
+                <div class="history-info">
+                    <div class="history-title">2室1厅 · 北欧风格</div>
+                    <div class="history-meta">85㎡ · 2024-01-10</div>
+                </div>
+                <span class="history-status status-ing">设计中</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 家具面板 ===== -->
+    <div class="panel-overlay" id="panelOverlay" onclick="closeAllPanels()"></div>
+    <div class="furniture-panel" id="furniturePanel">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);">
+            <span style="font-size:16px;font-weight:700;">添加家具</span>
+            <button class="prop-close" onclick="closeAllPanels()">✕</button>
+        </div>
+        <div class="furniture-tabs" id="furnitureTabs">
+            <div class="furniture-tab active" data-cat="living">客厅</div>
+            <div class="furniture-tab" data-cat="bedroom">卧室</div>
+            <div class="furniture-tab" data-cat="kitchen">厨房</div>
+            <div class="furniture-tab" data-cat="bathroom">卫浴</div>
+            <div class="furniture-tab" data-cat="other">其他</div>
+        </div>
+        <div class="furniture-grid" id="furnitureGrid"></div>
+    </div>
+
+    <!-- ===== 属性面板 ===== -->
+    <div class="prop-panel" id="propPanel">
+        <div class="prop-header">
+            <span class="prop-title" id="propTitle">房间属性</span>
+            <button class="prop-close" onclick="closePropPanel()">✕</button>
+        </div>
+        <div class="prop-body" id="propBody"></div>
+        <div class="prop-actions" id="propActions"></div>
+    </div>
+
+    <!-- ===== 风格选择弹窗 ===== -->
+    <div class="style-modal" id="styleModal">
+        <div class="style-modal-bg" onclick="closeStyleModal()"></div>
+        <div class="style-modal-content">
+            <div class="style-modal-header">
+                <span style="font-size:16px;font-weight:700;">选择装修风格</span>
+                <button class="prop-close" onclick="closeStyleModal()">✕</button>
+            </div>
+            <div class="style-grid" id="styleGrid"></div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>首页</span>
-        </a>
-        <a href="pages/products.html" class="nav-item">
-            <span class="nav-icon">🛒</span>
-            <span>商城</span>
-        </a>
-        <a href="pages/post-demand.html" class="nav-item">
-            <div class="nav-add">+</div>
-            <span style="margin-top: 5px;">发布</span>
-        </a>
-        <a href="pages/orders.html" class="nav-item">
-            <span class="nav-icon">📋</span>
-            <span>订单</span>
-        </a>
-        <a href="pages/profile.html" class="nav-item">
-            <span class="nav-icon">👤</span>
-            <span>我的</span>
-        </a>
+        <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>首页</span></a>
+        <a href="products.html" class="nav-item"><span class="nav-icon">🛒</span><span>商城</span></a>
+        <a href="post-demand.html" class="nav-item"><div class="nav-add">+</div><span style="margin-top:5px;">发布</span></a>
+        <a href="orders.html" class="nav-item"><span class="nav-icon">📋</span><span>订单</span></a>
+        <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>我的</span></a>
     </div>
 
-    <style>
-        .upload-area {
-            border: 3px dashed var(--border);
-            border-radius: var(--radius-lg);
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--bg);
-        }
-        
-        .upload-area:hover,
-        .upload-area.dragover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-        
-        .upload-icon {
-            font-size: 64px;
-            margin-bottom: 15px;
-        }
-        
-        .upload-text {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        .upload-hint {
-            font-size: 13px;
-            color: var(--text-lighter);
-        }
-        
-        .upload-options {
-            margin-top: 25px;
-        }
-        
-        .option-group {
-            background: var(--bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .option-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .preference-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .preference-tag {
-            padding: 10px 18px;
-            background: white;
-            border-radius: 25px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-        
-        .preference-tag:hover,
-        .preference-tag.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .template-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .template-card {
-            background: var(--bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-        
-        .template-card:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-        
-        .template-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        
-        .template-name {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .template-size {
-            font-size: 13px;
-            color: var(--text-lighter);
-            margin-bottom: 8px;
-        }
-        
-        .template-desc {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-        
-        .history-list {
-            display: grid;
-            gap: 12px;
-        }
-        
-        .history-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: var(--bg);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .history-item:hover {
-            background: var(--primary-light);
-        }
-        
-        .history-icon {
-            font-size: 32px;
-        }
-        
-        .history-info {
-            flex: 1;
-        }
-        
-        .history-title {
-            font-size: 15px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-        
-        .history-meta {
-            font-size: 12px;
-            color: var(--text-lighter);
-        }
-        
-        .history-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .history-status:contains('已完成') {
-            background: #e6f7e6;
-            color: #52c41a;
-        }
-        
-        .history-status:contains('设计中') {
-            background: #fff7e6;
-            color: #faad14;
-        }
-        
-        .history-empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-lighter);
-        }
-        
-        @media (min-width: 768px) {
-            .template-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .template-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-    </style>
-
+    <script src="../js/api.js"></script>
     <script>
-        // Tab switching
-        function switchTab(tabName) {
-            // Hide all sections
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected section
-            document.getElementById(tabName + '-section').style.display = 'block';
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
-        }
-        
-        // File upload handling
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
+    // ============================================================
+    //  户型模板数据
+    // ============================================================
+    const TEMPLATES = [
+        { id:'t1', name:'一室一厅 · 温馨小窝', filter:'1室', rooms:'1室1厅', area:55, badge:'hot',
+          desc:'适合单身贵族或甜蜜情侣，紧凑实用', rooms_detail:[
+            {name:'客厅',w:400,h:300,x:50,y:50,color:'#E8F5E9'},
+            {name:'卧室',w:300,h:250,x:50,y:350,color:'#E3F2FD'},
+            {name:'厨房',w:200,h:200,x:450,y:50,color:'#FFF3E0'},
+            {name:'卫生间',w:200,h:150,x:450,y:250,color:'#E0F7FA'},
+            {name:'阳台',w:150,h:100,x:450,y:400,color:'#F3E5F5'}
+        ]},
+        { id:'t2', name:'两室一厅 · 温馨之家', filter:'2室', rooms:'2室1厅', area:80, badge:'hot',
+          desc:'小家庭首选，功能齐全', rooms_detail:[
+            {name:'客厅',w:400,h:300,x:50,y:50,color:'#E8F5E9'},
+            {name:'主卧',w:300,h:280,x:50,y:350,color:'#E3F2FD'},
+            {name:'次卧',w:250,h:250,x:450,y:300,color:'#E3F2FD'},
+            {name:'厨房',w:200,h:180,x:450,y:50,color:'#FFF3E0'},
+            {name:'卫生间',w:150,h:150,x:450,y:230,color:'#E0F7FA'},
+            {name:'餐厅',w:200,h:120,x:250,y:50,color:'#FFF8E1'},
+            {name:'阳台',w:150,h:100,x:50,y:630,color:'#F3E5F5'}
+        ]},
+        { id:'t3', name:'两室两厅 · 舒适居所', filter:'2室', rooms:'2室2厅', area:95, badge:'new',
+          desc:'宽敞明亮，动静分离', rooms_detail:[
+            {name:'客厅',w:420,h:320,x:50,y:50,color:'#E8F5E9'},
+            {name:'餐厅',w:200,h:200,x:470,y:50,color:'#FFF8E1'},
+            {name:'主卧',w:320,h:280,x:50,y:370,color:'#E3F2FD'},
+            {name:'次卧',w:250,h:250,x:370,y:370,color:'#E3F2FD'},
+            {name:'厨房',w:180,h:180,x:470,y:250,color:'#FFF3E0'},
+            {name:'主卫',w:150,h:140,x:620,y:250,color:'#E0F7FA'},
+            {name:'客卫',w:120,h:120,x:620,y:390,color:'#E0F7FA'},
+            {name:'阳台',w:200,h:100,x:50,y:650,color:'#F3E5F5'}
+        ]},
+        { id:'t4', name:'三室两厅 · 幸福三代', filter:'3室', rooms:'3室2厅', area:120, badge:'hot',
+          desc:'三代同堂，其乐融融', rooms_detail:[
+            {name:'客厅',w:450,h:340,x:50,y:50,color:'#E8F5E9'},
+            {name:'餐厅',w:220,h:200,x:500,y:50,color:'#FFF8E1'},
+            {name:'主卧',w:320,h:280,x:50,y:390,color:'#E3F2FD'},
+            {name:'次卧',w:260,h:250,x:370,y:390,color:'#E3F2FD'},
+            {name:'书房',w:200,h:200,x:630,y:390,color:'#EDE7F6'},
+            {name:'厨房',w:200,h:180,x:500,y:250,color:'#FFF3E0'},
+            {name:'主卫',w:150,h:140,x:700,y:250,color:'#E0F7FA'},
+            {name:'客卫',w:130,h:130,x:700,y:120,color:'#E0F7FA'},
+            {name:'阳台',w:200,h:100,x:50,y:670,color:'#F3E5F5'},
+            {name:'玄关',w:120,h:150,x:50,y:50,color:'#EFEBE9'}
+        ]},
+        { id:'t5', name:'三室一厅 · 紧凑实用', filter:'3室', rooms:'3室1厅', area:100, badge:'',
+          desc:'高性价比，空间利用极致', rooms_detail:[
+            {name:'客厅',w:400,h:300,x:50,y:50,color:'#E8F5E9'},
+            {name:'主卧',w:300,h:260,x:50,y:350,color:'#E3F2FD'},
+            {name:'次卧A',w:240,h:230,x:350,y:350,color:'#E3F2FD'},
+            {name:'次卧B',w:200,h:200,x:450,y:50,color:'#E3F2FD'},
+            {name:'厨房',w:180,h:160,x:450,y:250,color:'#FFF3E0'},
+            {name:'卫生间',w:150,h:140,x:630,y:250,color:'#E0F7FA'},
+            {name:'阳台',w:150,h:100,x:50,y:610,color:'#F3E5F5'}
+        ]},
+        { id:'t6', name:'四室两厅 · 奢阔大宅', filter:'4室', rooms:'4室2厅', area:160, badge:'new',
+          desc:'宽敞奢华，尊享生活', rooms_detail:[
+            {name:'客厅',w:500,h:360,x:50,y:50,color:'#E8F5E9'},
+            {name:'餐厅',w:250,h:200,x:550,y:50,color:'#FFF8E1'},
+            {name:'主卧',w:350,h:300,x:50,y:410,color:'#E3F2FD'},
+            {name:'次卧A',w:280,h:260,x:400,y:410,color:'#E3F2FD'},
+            {name:'次卧B',w:240,h:240,x:50,y:710,color:'#E3F2FD'},
+            {name:'书房',w:220,h:220,x:290,y:710,color:'#EDE7F6'},
+            {name:'厨房',w:220,h:180,x:550,y:250,color:'#FFF3E0'},
+            {name:'主卫',w:180,h:160,x:770,y:250,color:'#E0F7FA'},
+            {name:'客卫',w:140,h:140,x:770,y:410,color:'#E0F7FA'},
+            {name:'衣帽间',w:160,h:160,x:680,y:410,color:'#FCE4EC'},
+            {name:'阳台',w:250,h:100,x:50,y:950,color:'#F3E5F5'}
+        ]},
+        { id:'t7', name:'复式 · 空间魔法', filter:'复式', rooms:'复式', area:180, badge:'hot',
+          desc:'上下两层，动静分离', rooms_detail:[
+            {name:'客厅(挑高)',w:450,h:350,x:50,y:50,color:'#E8F5E9'},
+            {name:'餐厅',w:250,h:200,x:500,y:50,color:'#FFF8E1'},
+            {name:'厨房',w:220,h:180,x:500,y:250,color:'#FFF3E0'},
+            {name:'卫生间',w:160,h:140,x:720,y:250,color:'#E0F7FA'},
+            {name:'楼梯',w:120,h:200,x:50,y:400,color:'#D7CCC8'},
+            {name:'主卧(二层)',w:350,h:300,x:200,y:400,color:'#E3F2FD'},
+            {name:'次卧(二层)',w:280,h:260,x:550,y:400,color:'#E3F2FD'},
+            {name:'书房(二层)',w:200,h:200,x:200,y:700,color:'#EDE7F6'},
+            {name:'阳台',w:200,h:100,x:50,y:600,color:'#F3E5F5'}
+        ]},
+        { id:'t8', name:'LOFT · 酷炫空间', filter:'复式', rooms:'LOFT', area:50, badge:'new',
+          desc:'挑高小户型，年轻人最爱', rooms_detail:[
+            {name:'一层客厅',w:400,h:280,x:50,y:50,color:'#E8F5E9'},
+            {name:'厨房',w:200,h:180,x:450,y:50,color:'#FFF3E0'},
+            {name:'卫生间',w:150,h:130,x:450,y:230,color:'#E0F7FA'},
+            {name:'楼梯',w:100,h:160,x:50,y:330,color:'#D7CCC8'},
+            {name:'二层卧室',w:350,h:250,x:150,y:330,color:'#E3F2FD'},
+            {name:'二层衣帽',w:150,h:150,x:500,y:330,color:'#FCE4EC'}
+        ]},
+        { id:'t9', name:'别墅 · 尊贵府邸', filter:'别墅', rooms:'别墅', area:300, badge:'',
+          desc:'独栋别墅，尽享奢华', rooms_detail:[
+            {name:'大客厅',w:500,h:380,x:50,y:50,color:'#E8F5E9'},
+            {name:'餐厅',w:280,h:220,x:550,y:50,color:'#FFF8E1'},
+            {name:'中厨',w:200,h:180,x:550,y:270,color:'#FFF3E0'},
+            {name:'西厨',w:180,h:160,x:750,y:270,color:'#FFF3E0'},
+            {name:'主卧套房',w:400,h:320,x:50,y:430,color:'#E3F2FD'},
+            {name:'主卫',w:200,h:180,x:50,y:750,color:'#E0F7FA'},
+            {name:'衣帽间',w:200,h:180,x:250,y:750,color:'#FCE4EC'},
+            {name:'次卧A',w:280,h:260,x:450,y:430,color:'#E3F2FD'},
+            {name:'次卧B',w:260,h:240,x:450,y:690,color:'#E3F2FD'},
+            {name:'书房',w:240,h:220,x:710,y:430,color:'#EDE7F6'},
+            {name:'影音室',w:260,h:200,x:710,y:650,color:'#E8EAF6'},
+            {name:'车库',w:300,h:200,x:50,y:930,color:'#EFEBE9'},
+            {name:'花园',w:400,h:200,x:350,y:930,color:'#C8E6C9'}
+        ]}
+    ];
+
+    // ============================================================
+    //  家具库
+    // ============================================================
+    const FURNITURE_DB = {
+        living: [
+            {name:'沙发',icon:'🛋️',w:180,h:80},{name:'茶几',icon:'☕',w:100,h:60},
+            {name:'电视柜',icon:'📺',w:160,h:40},{name:'书架',icon:'📚',w:120,h:30},
+            {name:'餐桌',icon:'🍽️',w:140,h:80},{name:'椅子',icon:'🪑',w:45,h:45},
+            {name:'地毯',icon:'🟫',w:200,h:140},{name:'落地灯',icon:'💡',w:30,h:30}
+        ],
+        bedroom: [
+            {name:'双人床',icon:'🛏️',w:200,h:180},{name:'单人床',icon:'🛏️',w:120,h:200},
+            {name:'衣柜',icon:'🗄️',w:180,h:60},{name:'床头柜',icon:'🪑',w:50,h:50},
+            {name:'梳妆台',icon:'💄',w:100,h:45},{name:'书桌',icon:'🖥️',w:120,h:60},
+            {name:'婴儿床',icon:'👶',w:80,h:130},{name:'衣架',icon:'👔',w:60,h:40}
+        ],
+        kitchen: [
+            {name:'橱柜',icon:'🗄️',w:300,h:60},{name:'冰箱',icon:'🧊',w:70,h:70},
+            {name:'灶台',icon:'🔥',w:70,h:60},{name:'水槽',icon:'🚰',w:60,h:50},
+            {name:'微波炉',icon:'📦',w:50,h:35},{name:'洗碗机',icon:'🫧',w:60,h:60}
+        ],
+        bathroom: [
+            {name:'马桶',icon:'🚽',w:50,h:70},{name:'淋浴间',icon:'🚿',w:90,h:90},
+            {name:'浴缸',icon:'🛁',w:170,h:75},{name:'洗手台',icon:'🪥',w:80,h:50},
+            {name:'洗衣机',icon:'🫧',w:60,h:60},{name:'镜子',icon:'🪞',w:60,h:10}
+        ],
+        other: [
+            {name:'钢琴',icon:'🎹',w:150,h:60},{name:'跑步机',icon:'🏃',w:130,h:70},
+            {name:'花盆',icon:'🪴',w:40,h:40},{name:'鞋柜',icon:'👟',w:100,h:35},
+            {name:'储物柜',icon:'📦',w:120,h:50},{name:'屏风',icon:'🏮',w:120,h:10}
+        ]
+    };
+
+    // ============================================================
+    //  装修风格
+    // ============================================================
+    const STYLES = [
+        {name:'现代简约',icon:'🏢',bg:'linear-gradient(135deg,#667eea,#764ba2)'},
+        {name:'北欧风格',icon:'🌲',bg:'linear-gradient(135deg,#a8edea,#fed6e3)'},
+        {name:'新中式',icon:'🏯',bg:'linear-gradient(135deg,#c94b4b,#4b134f)'},
+        {name:'轻奢风格',icon:'💎',bg:'linear-gradient(135deg,#3a1c71,#d76d77)'},
+        {name:'美式风格',icon:'🗽',bg:'linear-gradient(135deg,#f5af19,#f12711)'},
+        {name:'日式风格',icon:'🌸',bg:'linear-gradient(135deg,#ee9ca7,#ffdde1)'},
+        {name:'工业风格',icon:'⚙️',bg:'linear-gradient(135deg,#2c3e50,#3498db)'},
+        {name:'地中海风格',icon:'🌊',bg:'linear-gradient(135deg,#2193b0,#6dd5ed)'}
+    ];
+
+    // ============================================================
+    //  全局状态
+    // ============================================================
+    let currentTab = 'template';
+    let selectedTemplate = null;
+    let selectedStyle = '';
+    let currentTool = 'select';
+    let furnitureCat = 'living';
+
+    // 编辑器状态
+    const editor = {
+        canvas: null, ctx: null,
+        rooms: [], furniture: [], texts: [],
+        walls: [], doors: [], windows: [],
+        selectedObj: null,
+        scale: 1, offsetX: 0, offsetY: 0,
+        isDragging: false, dragStart: null,
+        isDrawing: false, drawStart: null,
+        history: [], historyIdx: -1,
+        gridSize: 20
+    };
+
+    // ============================================================
+    //  Tab 切换
+    // ============================================================
+    document.querySelectorAll('.fp-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.fp-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const name = tab.dataset.tab;
+            document.querySelectorAll('.fp-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            currentTab = name;
+            if (name === 'editor') initEditor();
         });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
+    });
+
+    // ============================================================
+    //  模板筛选 & 渲染
+    // ============================================================
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            renderTemplates(chip.dataset.filter);
         });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
+    });
+
+    function renderTemplates(filter) {
+        const list = document.getElementById('tplList');
+        const filtered = filter === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.filter === filter);
+        list.innerHTML = filtered.map(t => `
+            <div class="tpl-card" data-id="${t.id}" onclick="selectTemplate('${t.id}')">
+                <div class="tpl-preview"><canvas id="cvs_${t.id}" width="400" height="300"></canvas>
+                ${t.badge ? `<span class="tpl-badge ${t.badge}">${t.badge === 'hot' ? '热门' : '新品'}</span>` : ''}
+                </div>
+                <div class="tpl-info">
+                    <div class="tpl-name">${t.name}</div>
+                    <div class="tpl-meta"><span>${t.rooms} · ${t.area}㎡</span><span>${t.rooms_detail.length}个房间</span></div>
+                </div>
+            </div>
+        `).join('');
+        // 绘制缩略图
+        filtered.forEach(t => drawTemplatePreview('cvs_' + t.id, t));
+    }
+
+    function drawTemplatePreview(canvasId, tpl) {
+        const cvs = document.getElementById(canvasId);
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        const W = cvs.width, H = cvs.height;
+        ctx.clearRect(0, 0, W, H);
+        // 计算缩放
+        let maxX = 0, maxY = 0;
+        tpl.rooms_detail.forEach(r => { maxX = Math.max(maxX, r.x + r.w); maxY = Math.max(maxY, r.y + r.h); });
+        const sc = Math.min((W - 20) / maxX, (H - 20) / maxY);
+        const ox = (W - maxX * sc) / 2, oy = (H - maxY * sc) / 2;
+        // 画网格
+        ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 0.5;
+        for (let i = 0; i <= W; i += 20) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
+        for (let i = 0; i <= H; i += 20) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); }
+        // 画房间
+        tpl.rooms_detail.forEach(r => {
+            const rx = ox + r.x * sc, ry = oy + r.y * sc, rw = r.w * sc, rh = r.h * sc;
+            ctx.fillStyle = r.color; ctx.fillRect(rx, ry, rw, rh);
+            ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.strokeRect(rx, ry, rw, rh);
+            ctx.fillStyle = '#333'; ctx.font = `bold ${Math.max(10, 14 * sc)}px sans-serif`; ctx.textAlign = 'center';
+            ctx.fillText(r.name, rx + rw / 2, ry + rh / 2 + 4);
         });
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
+    }
+
+    function selectTemplate(id) {
+        selectedTemplate = TEMPLATES.find(t => t.id === id);
+        document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+        document.querySelector(`.tpl-card[data-id="${id}"]`).classList.add('selected');
+        // 显示详情
+        document.getElementById('tplList').style.display = 'none';
+        document.getElementById('tplFilter').style.display = 'none';
+        const detail = document.getElementById('tplDetail');
+        detail.style.display = 'block';
+        const t = selectedTemplate;
+        document.getElementById('tplInfoCard').innerHTML = `
+            <div class="info-card-title">📋 ${t.name}</div>
+            <div class="info-grid">
+                <div class="info-item"><div class="val">${t.rooms}</div><div class="lbl">户型</div></div>
+                <div class="info-item"><div class="val">${t.area}㎡</div><div class="lbl">面积</div></div>
+                <div class="info-item"><div class="val">${t.rooms_detail.length}</div><div class="lbl">房间数</div></div>
+            </div>
+            <p style="margin-top:12px;font-size:13px;color:var(--text-light);">${t.desc}</p>
+        `;
+        // 绘制大预览
+        const existing = document.getElementById('tplBigCanvas');
+        if (existing) existing.remove();
+        const previewCvs = document.createElement('canvas');
+        previewCvs.id = 'tplBigCanvas';
+        previewCvs.width = 700; previewCvs.height = 500;
+        previewCvs.style.width = '100%'; previewCvs.style.borderRadius = '12px';
+        previewCvs.style.marginTop = '12px';
+        document.getElementById('tplInfoCard').appendChild(previewCvs);
+        drawTemplatePreview('tplBigCanvas', t);
+    }
+
+    function backToList() {
+        document.getElementById('tplList').style.display = '';
+        document.getElementById('tplFilter').style.display = '';
+        document.getElementById('tplDetail').style.display = 'none';
+    }
+
+    function enterEditor() {
+        if (!selectedTemplate) return;
+        // 切换到编辑器tab
+        document.querySelectorAll('.fp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.fp-tab[data-tab="editor"]').classList.add('active');
+        document.querySelectorAll('.fp-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('sec-editor').classList.add('active');
+        currentTab = 'editor';
+        initEditor();
+        // 加载模板到编辑器
+        loadTemplateToEditor(selectedTemplate);
+    }
+
+    function loadTemplateToEditor(tpl) {
+        editor.rooms = tpl.rooms_detail.map((r, i) => ({
+            id: 'room_' + i, name: r.name, x: r.x, y: r.y, w: r.w, h: r.h, color: r.color
+        }));
+        editor.furniture = [];
+        editor.walls = [];
+        editor.doors = [];
+        editor.windows = [];
+        editor.texts = [];
+        editor.selectedObj = null;
+        saveEditorState();
+        editorFit();
+        renderEditor();
+    }
+
+    // ============================================================
+    //  编辑器初始化
+    // ============================================================
+    function initEditor() {
+        if (editor.canvas) return;
+        const wrap = document.getElementById('canvasWrap');
+        const cvs = document.getElementById('editorCanvas');
+        editor.canvas = cvs;
+        editor.ctx = cvs.getContext('2d');
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        // 鼠标/触摸事件
+        cvs.addEventListener('pointerdown', onPointerDown);
+        cvs.addEventListener('pointermove', onPointerMove);
+        cvs.addEventListener('pointerup', onPointerUp);
+        cvs.addEventListener('wheel', onWheel, { passive: false });
+        renderEditor();
+    }
+
+    function resizeCanvas() {
+        const wrap = document.getElementById('canvasWrap');
+        editor.canvas.width = wrap.clientWidth * devicePixelRatio;
+        editor.canvas.height = wrap.clientHeight * devicePixelRatio;
+        editor.canvas.style.width = wrap.clientWidth + 'px';
+        editor.canvas.style.height = wrap.clientHeight + 'px';
+        editor.ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        renderEditor();
+    }
+
+    // ============================================================
+    //  坐标转换
+    // ============================================================
+    function screenToWorld(sx, sy) {
+        return { x: (sx - editor.offsetX) / editor.scale, y: (sy - editor.offsetY) / editor.scale };
+    }
+    function worldToScreen(wx, wy) {
+        return { x: wx * editor.scale + editor.offsetX, y: wy * editor.scale + editor.offsetY };
+    }
+
+    // ============================================================
+    //  绘制编辑器
+    // ============================================================
+    function renderEditor() {
+        const ctx = editor.ctx;
+        const W = editor.canvas.width / devicePixelRatio;
+        const H = editor.canvas.height / devicePixelRatio;
+        ctx.clearRect(0, 0, W, H);
+        ctx.save();
+        ctx.translate(editor.offsetX, editor.offsetY);
+        ctx.scale(editor.scale, editor.scale);
+        // 网格
+        drawGrid(ctx, W, H);
+        // 房间
+        editor.rooms.forEach(r => drawRoom(ctx, r, r === editor.selectedObj));
+        // 墙体
+        editor.walls.forEach(w => drawWall(ctx, w, w === editor.selectedObj));
+        // 门
+        editor.doors.forEach(d => drawDoor(ctx, d, d === editor.selectedObj));
+        // 窗
+        editor.windows.forEach(w => drawWindow(ctx, w, w === editor.selectedObj));
+        // 家具
+        editor.furniture.forEach(f => drawFurniture(ctx, f, f === editor.selectedObj));
+        // 文字
+        editor.texts.forEach(t => drawText(ctx, t, t === editor.selectedObj));
+        // 绘制中的临时对象
+        if (editor.isDrawing && editor.drawStart && editor.tempEnd) {
+            drawTempShape(ctx);
+        }
+        ctx.restore();
+        // 尺寸标注
+        drawDimensions(ctx);
+    }
+
+    function drawGrid(ctx, W, H) {
+        const g = editor.gridSize;
+        const startX = -editor.offsetX / editor.scale;
+        const startY = -editor.offsetY / editor.scale;
+        const endX = startX + W / editor.scale;
+        const endY = startY + H / editor.scale;
+        ctx.strokeStyle = '#e8e8e8';
+        ctx.lineWidth = 0.5 / editor.scale;
+        ctx.beginPath();
+        for (let x = Math.floor(startX / g) * g; x <= endX; x += g) {
+            ctx.moveTo(x, startY); ctx.lineTo(x, endY);
+        }
+        for (let y = Math.floor(startY / g) * g; y <= endY; y += g) {
+            ctx.moveTo(startX, y); ctx.lineTo(endX, y);
+        }
+        ctx.stroke();
+    }
+
+    function drawRoom(ctx, room, selected) {
+        ctx.fillStyle = room.color || '#E8F5E9';
+        ctx.fillRect(room.x, room.y, room.w, room.h);
+        ctx.strokeStyle = selected ? '#ff5000' : '#555';
+        ctx.lineWidth = selected ? 3 / editor.scale : 2 / editor.scale;
+        ctx.strokeRect(room.x, room.y, room.w, room.h);
+        // 名称
+        ctx.fillStyle = '#333';
+        ctx.font = `bold ${Math.max(12, 16 / editor.scale)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(room.name, room.x + room.w / 2, room.y + room.h / 2);
+        // 尺寸
+        ctx.font = `${Math.max(9, 11 / editor.scale)}px sans-serif`;
+        ctx.fillStyle = '#888';
+        const wM = (room.w / 10).toFixed(1);
+        const hM = (room.h / 10).toFixed(1);
+        ctx.fillText(`${wM}m`, room.x + room.w / 2, room.y + room.h - 8 / editor.scale);
+        ctx.save();
+        ctx.translate(room.x + 8 / editor.scale, room.y + room.h / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(`${hM}m`, 0, 0);
+        ctx.restore();
+        if (selected) {
+            drawResizeHandles(ctx, room);
+        }
+    }
+
+    function drawWall(ctx, wall, selected) {
+        ctx.strokeStyle = selected ? '#ff5000' : '#333';
+        ctx.lineWidth = (selected ? 6 : 4) / editor.scale;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(wall.x1, wall.y1);
+        ctx.lineTo(wall.x2, wall.y2);
+        ctx.stroke();
+    }
+
+    function drawDoor(ctx, door, selected) {
+        const cx = door.x, cy = door.y;
+        const s = 30 / editor.scale;
+        ctx.strokeStyle = selected ? '#ff5000' : '#8B4513';
+        ctx.lineWidth = 2 / editor.scale;
+        ctx.fillStyle = '#FFD180';
+        ctx.beginPath();
+        ctx.arc(cx, cy, s, -Math.PI / 2, 0);
+        ctx.lineTo(cx, cy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    function drawWindow(ctx, win, selected) {
+        ctx.strokeStyle = selected ? '#ff5000' : '#4FC3F7';
+        ctx.lineWidth = 4 / editor.scale;
+        ctx.setLineDash([6 / editor.scale, 4 / editor.scale]);
+        ctx.beginPath();
+        ctx.moveTo(win.x, win.y);
+        ctx.lineTo(win.x + (win.w || 60), win.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    function drawFurniture(ctx, f, selected) {
+        ctx.fillStyle = selected ? '#FFE0B2' : '#FFF8E1';
+        ctx.strokeStyle = selected ? '#ff5000' : '#888';
+        ctx.lineWidth = (selected ? 2 : 1) / editor.scale;
+        roundRect(ctx, f.x, f.y, f.w, f.h, 4 / editor.scale);
+        ctx.fill();
+        ctx.stroke();
+        ctx.font = `${Math.max(16, f.w * 0.4)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(f.icon, f.x + f.w / 2, f.y + f.h / 2 - 2 / editor.scale);
+        ctx.font = `${Math.max(8, 10 / editor.scale)}px sans-serif`;
+        ctx.fillStyle = '#666';
+        ctx.fillText(f.name, f.x + f.w / 2, f.y + f.h - 6 / editor.scale);
+        if (selected) drawResizeHandles(ctx, f);
+    }
+
+    function drawText(ctx, t, selected) {
+        ctx.font = `${t.size || 14}px sans-serif`;
+        ctx.fillStyle = selected ? '#ff5000' : '#333';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(t.text, t.x, t.y);
+        if (selected) {
+            const m = ctx.measureText(t.text);
+            ctx.strokeStyle = '#ff5000';
+            ctx.lineWidth = 1 / editor.scale;
+            ctx.setLineDash([4 / editor.scale, 2 / editor.scale]);
+            ctx.strokeRect(t.x - 2, t.y - 2, m.width + 4, (t.size || 14) + 4);
+            ctx.setLineDash([]);
+        }
+    }
+
+    function drawResizeHandles(ctx, obj) {
+        const s = 6 / editor.scale;
+        const handles = [
+            { x: obj.x, y: obj.y },
+            { x: obj.x + obj.w, y: obj.y },
+            { x: obj.x, y: obj.y + obj.h },
+            { x: obj.x + obj.w, y: obj.y + obj.h }
+        ];
+        handles.forEach(h => {
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#ff5000';
+            ctx.lineWidth = 2 / editor.scale;
+            ctx.fillRect(h.x - s, h.y - s, s * 2, s * 2);
+            ctx.strokeRect(h.x - s, h.y - s, s * 2, s * 2);
         });
-        
-        function handleFile(file) {
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-            
-            if (file.size > maxSize) {
-                showToast('文件大小不能超过10MB');
-                return;
-            }
-            
-            if (!allowedTypes.includes(file.type)) {
-                showToast('只支持 JPG、PNG、GIF、PDF 格式');
-                return;
-            }
-            
-            // Update upload area
-            const uploadIcon = uploadArea.querySelector('.upload-icon');
-            const uploadText = uploadArea.querySelector('.upload-text');
-            
-            uploadIcon.textContent = '✅';
-            uploadText.textContent = file.name;
-            
-            showToast('文件上传成功');
+    }
+
+    function drawTempShape(ctx) {
+        const s = editor.drawStart, e = editor.tempEnd;
+        if (currentTool === 'wall') {
+            ctx.strokeStyle = '#ff5000';
+            ctx.lineWidth = 4 / editor.scale;
+            ctx.setLineDash([6 / editor.scale, 4 / editor.scale]);
+            ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(e.x, e.y); ctx.stroke();
+            ctx.setLineDash([]);
+        } else if (currentTool === 'room') {
+            ctx.strokeStyle = '#ff5000';
+            ctx.lineWidth = 2 / editor.scale;
+            ctx.setLineDash([6 / editor.scale, 4 / editor.scale]);
+            ctx.fillStyle = 'rgba(255,80,0,0.08)';
+            const x = Math.min(s.x, e.x), y = Math.min(s.y, e.y);
+            const w = Math.abs(e.x - s.x), h = Math.abs(e.y - s.y);
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeRect(x, y, w, h);
+            ctx.setLineDash([]);
         }
-        
-        // Preference toggle
-        function togglePreference(element) {
-            element.classList.toggle('active');
-        }
-        
-        // Template selection
-        function selectTemplate(templateName) {
-            document.getElementById('roomType').value = templateName;
-            switchTab('upload');
-            showToast(`已选择 ${templateName} 模板`);
-        }
-        
-        // Start design
-        function startDesign() {
-            const roomType = document.getElementById('roomType').value;
-            const area = document.getElementById('area').value;
-            const style = document.getElementById('style').value;
-            
-            if (!roomType) {
-                showToast('请选择户型');
-                return;
+    }
+
+    function drawDimensions(ctx) {
+        // 画布左上角显示缩放比例
+        const W = editor.canvas.width / devicePixelRatio;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(8, 8, 90, 24);
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`缩放: ${(editor.scale * 100).toFixed(0)}%`, 14, 20);
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    // ============================================================
+    //  指针事件
+    // ============================================================
+    function onPointerDown(e) {
+        const rect = editor.canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+        const w = screenToWorld(sx, sy);
+
+        if (currentTool === 'select') {
+            // 检查是否点击了某个对象
+            const hit = hitTest(w.x, w.y);
+            editor.selectedObj = hit;
+            if (hit) {
+                editor.isDragging = true;
+                editor.dragStart = { x: w.x, y: w.y, ox: hit.x || hit.x1, oy: hit.y || hit.y1 };
             }
-            
-            if (!area) {
-                showToast('请输入面积');
-                return;
+            renderEditor();
+            if (hit) showPropPanel(hit);
+        } else if (currentTool === 'wall' || currentTool === 'room') {
+            editor.isDrawing = true;
+            editor.drawStart = { x: w.x, y: w.y };
+            editor.tempEnd = { x: w.x, y: w.y };
+        } else if (currentTool === 'door') {
+            editor.doors.push({ id: 'door_' + Date.now(), x: w.x, y: w.y });
+            saveEditorState(); renderEditor();
+        } else if (currentTool === 'window') {
+            editor.windows.push({ id: 'win_' + Date.now(), x: w.x, y: w.y, w: 60 });
+            saveEditorState(); renderEditor();
+        } else if (currentTool === 'text') {
+            const txt = prompt('输入文字:');
+            if (txt) {
+                editor.texts.push({ id: 'txt_' + Date.now(), text: txt, x: w.x, y: w.y, size: 14 });
+                saveEditorState(); renderEditor();
             }
-            
-            if (!style) {
-                showToast('请选择装修风格');
-                return;
-            }
-            
-            // Get selected preferences
-            const preferences = [];
-            document.querySelectorAll('.preference-tag.active').forEach(tag => {
-                preferences.push(tag.textContent);
-            });
-            
-            // Show loading
-            showToast('正在生成AI设计方案...');
-            
-            // Simulate AI processing
-            setTimeout(() => {
-                showToast('设计方案生成完成！');
-                // In real app, redirect to design result page
-            }, 2000);
         }
-        
-        // Toast notification
-        function showToast(message, duration = 2000) {
-            let toast = document.querySelector('.toast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.className = 'toast';
-                document.body.appendChild(toast);
+    }
+
+    function onPointerMove(e) {
+        const rect = editor.canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+        const w = screenToWorld(sx, sy);
+
+        if (editor.isDragging && editor.selectedObj && editor.dragStart) {
+            const dx = w.x - editor.dragStart.x;
+            const dy = w.y - editor.dragStart.y;
+            if (editor.selectedObj.x1 !== undefined) {
+                // 墙体
+                editor.selectedObj.x1 = editor.dragStart.ox + dx;
+                editor.selectedObj.y1 = editor.dragStart.oy + dy;
+                editor.selectedObj.x2 += dx;
+                editor.selectedObj.y2 += dy;
+            } else {
+                editor.selectedObj.x = editor.dragStart.ox + dx;
+                editor.selectedObj.y = editor.dragStart.oy + dy;
             }
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), duration);
+            renderEditor();
         }
+        if (editor.isDrawing) {
+            // 吸附到网格
+            editor.tempEnd = { x: Math.round(w.x / editor.gridSize) * editor.gridSize, y: Math.round(w.y / editor.gridSize) * editor.gridSize };
+            renderEditor();
+        }
+    }
+
+    function onPointerUp(e) {
+        if (editor.isDragging) {
+            editor.isDragging = false;
+            editor.dragStart = null;
+            saveEditorState();
+        }
+        if (editor.isDrawing) {
+            editor.isDrawing = false;
+            const s = editor.drawStart, en = editor.tempEnd;
+            if (currentTool === 'wall' && s && en) {
+                const dist = Math.hypot(en.x - s.x, en.y - s.y);
+                if (dist > 10) {
+                    editor.walls.push({ id: 'wall_' + Date.now(), x1: s.x, y1: s.y, x2: en.x, y2: en.y });
+                    saveEditorState();
+                }
+            } else if (currentTool === 'room' && s && en) {
+                const x = Math.min(s.x, en.x), y = Math.min(s.y, en.y);
+                const w = Math.abs(en.x - s.x), h = Math.abs(en.y - s.y);
+                if (w > 20 && h > 20) {
+                    const name = prompt('房间名称:', '新房间') || '新房间';
+                    const colors = ['#E8F5E9','#E3F2FD','#FFF3E0','#E0F7FA','#F3E5F5','#FFF8E1','#EFEBE9','#FCE4EC'];
+                    editor.rooms.push({ id: 'room_' + Date.now(), name, x, y, w, h, color: colors[editor.rooms.length % colors.length] });
+                    saveEditorState();
+                }
+            }
+            editor.drawStart = null;
+            editor.tempEnd = null;
+            renderEditor();
+        }
+    }
+
+    function onWheel(e) {
+        e.preventDefault();
+        const rect = editor.canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomAt(sx, sy, factor);
+    }
+
+    function zoomAt(sx, sy, factor) {
+        const oldScale = editor.scale;
+        editor.scale = Math.max(0.2, Math.min(5, editor.scale * factor));
+        const ratio = editor.scale / oldScale;
+        editor.offsetX = sx - (sx - editor.offsetX) * ratio;
+        editor.offsetY = sy - (sy - editor.offsetY) * ratio;
+        renderEditor();
+    }
+
+    function editorZoom(factor) {
+        const cvs = editor.canvas;
+        const rect = cvs.getBoundingClientRect();
+        zoomAt(rect.width / 2, rect.height / 2, factor);
+    }
+
+    function editorFit() {
+        if (!editor.canvas) return;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        const all = [...editor.rooms, ...editor.furniture];
+        all.forEach(r => {
+            minX = Math.min(minX, r.x); minY = Math.min(minY, r.y);
+            maxX = Math.max(maxX, r.x + r.w); maxY = Math.max(maxY, r.y + r.h);
+        });
+        editor.walls.forEach(w => {
+            minX = Math.min(minX, w.x1, w.x2); minY = Math.min(minY, w.y1, w.y2);
+            maxX = Math.max(maxX, w.x1, w.x2); maxY = Math.max(maxY, w.y1, w.y2);
+        });
+        if (!all.length && !editor.walls.length) { minX = 0; minY = 0; maxX = 800; maxY = 600; }
+        const W = editor.canvas.width / devicePixelRatio;
+        const H = editor.canvas.height / devicePixelRatio;
+        const padding = 40;
+        editor.scale = Math.min((W - padding * 2) / (maxX - minX + 1), (H - padding * 2) / (maxY - minY + 1));
+        editor.offsetX = padding + (W - padding * 2 - (maxX - minX) * editor.scale) / 2 - minX * editor.scale;
+        editor.offsetY = padding + (H - padding * 2 - (maxY - minY) * editor.scale) / 2 - minY * editor.scale;
+        renderEditor();
+    }
+
+    // ============================================================
+    //  碰撞检测
+    // ============================================================
+    function hitTest(wx, wy) {
+        // 反向遍历（后绘制的在上层）
+        for (let i = editor.texts.length - 1; i >= 0; i--) {
+            const t = editor.texts[i];
+            if (wx >= t.x && wx <= t.x + 100 && wy >= t.y && wy <= t.y + 20) return t;
+        }
+        for (let i = editor.furniture.length - 1; i >= 0; i--) {
+            const f = editor.furniture[i];
+            if (wx >= f.x && wx <= f.x + f.w && wy >= f.y && wy <= f.y + f.h) return f;
+        }
+        for (let i = editor.doors.length - 1; i >= 0; i--) {
+            const d = editor.doors[i];
+            if (Math.hypot(wx - d.x, wy - d.y) < 20) return d;
+        }
+        for (let i = editor.windows.length - 1; i >= 0; i--) {
+            const w = editor.windows[i];
+            if (wx >= w.x - 5 && wx <= w.x + (w.w || 60) + 5 && wy >= w.y - 10 && wy <= w.y + 10) return w;
+        }
+        for (let i = editor.rooms.length - 1; i >= 0; i--) {
+            const r = editor.rooms[i];
+            if (wx >= r.x && wx <= r.x + r.w && wy >= r.y && wy <= r.y + r.h) return r;
+        }
+        return null;
+    }
+
+    // ============================================================
+    //  工具切换
+    // ============================================================
+    function setTool(tool) {
+        currentTool = tool;
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
+        editor.canvas.style.cursor = tool === 'select' ? 'default' : 'crosshair';
+    }
+
+    // ============================================================
+    //  家具面板
+    // ============================================================
+    function toggleFurniturePanel() {
+        const panel = document.getElementById('furniturePanel');
+        const overlay = document.getElementById('panelOverlay');
+        const isOpen = panel.classList.contains('show');
+        closeAllPanels();
+        if (!isOpen) {
+            panel.classList.add('show');
+            overlay.classList.add('show');
+            renderFurnitureGrid();
+        }
+    }
+
+    function renderFurnitureGrid() {
+        const items = FURNITURE_DB[furnitureCat] || [];
+        document.getElementById('furnitureGrid').innerHTML = items.map((f, i) => `
+            <div class="furniture-item" onclick="addFurniture('${furnitureCat}',${i})">
+                <span class="f-icon">${f.icon}</span>
+                <span class="f-name">${f.name}</span>
+            </div>
+        `).join('');
+    }
+
+    document.querySelectorAll('.furniture-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.furniture-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            furnitureCat = tab.dataset.cat;
+            renderFurnitureGrid();
+        });
+    });
+
+    function addFurniture(cat, idx) {
+        const f = FURNITURE_DB[cat][idx];
+        const centerX = (editor.canvas.width / devicePixelRatio / 2 - editor.offsetX) / editor.scale;
+        const centerY = (editor.canvas.height / devicePixelRatio / 2 - editor.offsetY) / editor.scale;
+        editor.furniture.push({
+            id: 'f_' + Date.now(), name: f.name, icon: f.icon,
+            x: centerX - f.w / 2, y: centerY - f.h / 2, w: f.w, h: f.h
+        });
+        saveEditorState();
+        renderEditor();
+        closeAllPanels();
+        showToast(`已添加 ${f.name}`);
+    }
+
+    // ============================================================
+    //  属性面板
+    // ============================================================
+    function showPropPanel(obj) {
+        const panel = document.getElementById('propPanel');
+        const body = document.getElementById('propBody');
+        const actions = document.getElementById('propActions');
+        const title = document.getElementById('propTitle');
+
+        if (obj.name && obj.w !== undefined && obj.h !== undefined && !obj.icon) {
+            // 房间
+            title.textContent = '🏠 ' + obj.name;
+            body.innerHTML = `
+                <div class="prop-row"><span class="prop-label">名称</span><div class="prop-value"><input class="prop-input" id="pName" value="${obj.name}" style="width:120px;"></div></div>
+                <div class="prop-row"><span class="prop-label">宽度(cm)</span><div class="prop-value"><input class="prop-input" type="number" id="pW" value="${obj.w}"></div></div>
+                <div class="prop-row"><span class="prop-label">高度(cm)</span><div class="prop-value"><input class="prop-input" type="number" id="pH" value="${obj.h}"></div></div>
+                <div class="prop-row"><span class="prop-label">颜色</span><div class="prop-value">
+                    <select class="prop-select" id="pColor">
+                        <option value="#E8F5E9" ${obj.color==='#E8F5E9'?'selected':''}>绿色系</option>
+                        <option value="#E3F2FD" ${obj.color==='#E3F2FD'?'selected':''}>蓝色系</option>
+                        <option value="#FFF3E0" ${obj.color==='#FFF3E0'?'selected':''}>橙色系</option>
+                        <option value="#E0F7FA" ${obj.color==='#E0F7FA'?'selected':''}>青色系</option>
+                        <option value="#F3E5F5" ${obj.color==='#F3E5F5'?'selected':''}>紫色系</option>
+                        <option value="#FFF8E1" ${obj.color==='#FFF8E1'?'selected':''}>黄色系</option>
+                        <option value="#EFEBE9" ${obj.color==='#EFEBE9'?'selected':''}>棕色系</option>
+                        <option value="#FCE4EC" ${obj.color==='#FCE4EC'?'selected':''}>粉色系</option>
+                    </select>
+                </div></div>
+                <div class="prop-row"><span class="prop-label">面积</span><span class="prop-value" style="color:var(--primary);font-weight:700;">${(obj.w * obj.h / 10000).toFixed(1)}㎡</span></div>
+            `;
+            actions.innerHTML = `
+                <button class="prop-btn prop-btn-primary" style="flex:1;" onclick="applyRoomProp()">确认修改</button>
+                <button class="prop-btn prop-btn-danger" onclick="deleteSelected()">删除</button>
+            `;
+        } else if (obj.icon) {
+            // 家具
+            title.textContent = obj.icon + ' ' + obj.name;
+            body.innerHTML = `
+                <div class="prop-row"><span class="prop-label">宽度(cm)</span><div class="prop-value"><input class="prop-input" type="number" id="pW" value="${obj.w}"></div></div>
+                <div class="prop-row"><span class="prop-label">高度(cm)</span><div class="prop-value"><input class="prop-input" type="number" id="pH" value="${obj.h}"></div></div>
+            `;
+            actions.innerHTML = `
+                <button class="prop-btn prop-btn-primary" style="flex:1;" onclick="applyFurnitureProp()">确认修改</button>
+                <button class="prop-btn prop-btn-danger" onclick="deleteSelected()">删除</button>
+            `;
+        } else if (obj.text !== undefined) {
+            title.textContent = '📝 文字';
+            body.innerHTML = `
+                <div class="prop-row"><span class="prop-label">内容</span><div class="prop-value"><input class="prop-input" id="pText" value="${obj.text}" style="width:150px;"></div></div>
+                <div class="prop-row"><span class="prop-label">字号</span><div class="prop-value"><input class="prop-input" type="number" id="pSize" value="${obj.size || 14}"></div></div>
+            `;
+            actions.innerHTML = `
+                <button class="prop-btn prop-btn-primary" style="flex:1;" onclick="applyTextProp()">确认修改</button>
+                <button class="prop-btn prop-btn-danger" onclick="deleteSelected()">删除</button>
+            `;
+        } else {
+            closePropPanel(); return;
+        }
+        panel.classList.add('show');
+    }
+
+    function applyRoomProp() {
+        if (!editor.selectedObj) return;
+        const r = editor.selectedObj;
+        r.name = document.getElementById('pName').value;
+        r.w = parseInt(document.getElementById('pW').value) || r.w;
+        r.h = parseInt(document.getElementById('pH').value) || r.h;
+        r.color = document.getElementById('pColor').value;
+        saveEditorState(); renderEditor(); closePropPanel();
+    }
+
+    function applyFurnitureProp() {
+        if (!editor.selectedObj) return;
+        editor.selectedObj.w = parseInt(document.getElementById('pW').value) || editor.selectedObj.w;
+        editor.selectedObj.h = parseInt(document.getElementById('pH').value) || editor.selectedObj.h;
+        saveEditorState(); renderEditor(); closePropPanel();
+    }
+
+    function applyTextProp() {
+        if (!editor.selectedObj) return;
+        editor.selectedObj.text = document.getElementById('pText').value;
+        editor.selectedObj.size = parseInt(document.getElementById('pSize').value) || 14;
+        saveEditorState(); renderEditor(); closePropPanel();
+    }
+
+    function deleteSelected() {
+        if (!editor.selectedObj) return;
+        const obj = editor.selectedObj;
+        editor.rooms = editor.rooms.filter(r => r !== obj);
+        editor.furniture = editor.furniture.filter(f => f !== obj);
+        editor.walls = editor.walls.filter(w => w !== obj);
+        editor.doors = editor.doors.filter(d => d !== obj);
+        editor.windows = editor.windows.filter(w => w !== obj);
+        editor.texts = editor.texts.filter(t => t !== obj);
+        editor.selectedObj = null;
+        saveEditorState(); renderEditor(); closePropPanel();
+    }
+
+    function closePropPanel() {
+        document.getElementById('propPanel').classList.remove('show');
+    }
+
+    function closeAllPanels() {
+        document.getElementById('furniturePanel').classList.remove('show');
+        document.getElementById('panelOverlay').classList.remove('show');
+    }
+
+    // ============================================================
+    //  撤销 / 重做
+    // ============================================================
+    function saveEditorState() {
+        const state = JSON.stringify({
+            rooms: editor.rooms, furniture: editor.furniture,
+            walls: editor.walls, doors: editor.doors,
+            windows: editor.windows, texts: editor.texts
+        });
+        editor.history = editor.history.slice(0, editor.historyIdx + 1);
+        editor.history.push(state);
+        editor.historyIdx = editor.history.length - 1;
+        // 保存到localStorage
+        localStorage.setItem('fp_editor_state', state);
+    }
+
+    function editorUndo() {
+        if (editor.historyIdx <= 0) return;
+        editor.historyIdx--;
+        restoreEditorState(editor.history[editor.historyIdx]);
+    }
+
+    function editorRedo() {
+        if (editor.historyIdx >= editor.history.length - 1) return;
+        editor.historyIdx++;
+        restoreEditorState(editor.history[editor.historyIdx]);
+    }
+
+    function restoreEditorState(json) {
+        const s = JSON.parse(json);
+        editor.rooms = s.rooms; editor.furniture = s.furniture;
+        editor.walls = s.walls; editor.doors = s.doors;
+        editor.windows = s.windows; editor.texts = s.texts;
+        editor.selectedObj = null;
+        renderEditor();
+    }
+
+    function editorClear() {
+        if (!confirm('确定清空所有内容？')) return;
+        editor.rooms = []; editor.furniture = [];
+        editor.walls = []; editor.doors = [];
+        editor.windows = []; editor.texts = [];
+        editor.selectedObj = null;
+        saveEditorState(); renderEditor();
+    }
+
+    // ============================================================
+    //  风格选择
+    // ============================================================
+    function openStyleModal() {
+        const grid = document.getElementById('styleGrid');
+        grid.innerHTML = STYLES.map(s => `
+            <div class="style-card ${selectedStyle === s.name ? 'selected' : ''}" onclick="pickStyle('${s.name}')">
+                <div class="style-card-preview" style="background:${s.bg}">${s.icon}</div>
+                <div class="style-card-name">${s.name}</div>
+            </div>
+        `).join('');
+        document.getElementById('styleModal').classList.add('show');
+    }
+
+    function closeStyleModal() {
+        document.getElementById('styleModal').classList.remove('show');
+    }
+
+    function pickStyle(name) {
+        selectedStyle = name;
+        closeStyleModal();
+        showToast(`已选择 ${name} 风格`);
+    }
+
+    // ============================================================
+    //  AI设计 & 3D预览
+    // ============================================================
+    function applyAIStyle() {
+        if (!selectedTemplate) return;
+        openStyleModal();
+    }
+
+    function open3DPreview() {
+        window.location.href = '3d-preview.html';
+    }
+
+    // ============================================================
+    //  上传相关
+    // ============================================================
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault(); uploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+    function handleFile(file) {
+        if (file.size > 10 * 1024 * 1024) { showToast('文件大小不能超过10MB'); return; }
+        if (!['image/jpeg', 'image/png', 'image/gif', 'application/pdf'].includes(file.type)) {
+            showToast('只支持 JPG、PNG、GIF、PDF 格式'); return;
+        }
+        uploadArea.querySelector('.upload-icon').textContent = '✅';
+        uploadArea.querySelector('.upload-text').textContent = file.name;
+        showToast('文件上传成功');
+    }
+
+    function startUploadDesign() {
+        const roomType = document.getElementById('roomType').value;
+        const area = document.getElementById('areaInput').value;
+        const style = document.getElementById('styleSelect').value;
+        if (!roomType) { showToast('请选择户型'); return; }
+        if (!area) { showToast('请输入面积'); return; }
+        if (!style) { showToast('请选择装修风格'); return; }
+        showToast('正在生成AI设计方案...');
+        setTimeout(() => showToast('设计方案生成完成！'), 2000);
+    }
+
+    // ============================================================
+    //  历史记录
+    // ============================================================
+    function loadHistory(idx) {
+        showToast('加载历史设计...');
+    }
+
+    // ============================================================
+    //  Toast
+    // ============================================================
+    function showToast(msg, dur = 2000) {
+        let t = document.querySelector('.toast');
+        if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    // ============================================================
+    //  初始化
+    // ============================================================
+    renderTemplates('all');
     </script>
 </body>
 </html>
