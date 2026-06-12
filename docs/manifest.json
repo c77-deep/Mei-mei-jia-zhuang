@@ -1,0 +1,67 @@
+{
+  "name": "美家家装 - AI智能装修设计平台",
+  "short_name": "美家家装",
+  "description": "AI驱动的智能装修平台，提供户型设计、材料选购、施工监理一站式服务",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff5000",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["lifestyle", "business"],
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/screenshot-2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI设计",
+      "short_name": "AI设计",
+      "description": "上传户型图，AI生成装修方案",
+      "url": "/pages/ai-design.html",
+      "icons": [
+        {
+          "src": "/images/shortcut-ai.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "装修案例",
+      "short_name": "案例",
+      "description": "查看装修案例和效果图",
+      "url": "/pages/cases.html",
+      "icons": [
+        {
+          "src": "/images/shortcut-cases.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

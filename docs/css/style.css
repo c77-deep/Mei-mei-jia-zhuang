@@ -11,12 +11,18 @@
     --success: #52c41a;
     --warning: #faad14;
     --danger: #ff4d4f;
+    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+    --radius: 12px;
+    --radius-lg: 20px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -25,6 +31,8 @@ body {
     color: var(--text);
     line-height: 1.6;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -44,7 +52,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 10px rgba(255, 80, 0, 0.3);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
 }
 
 .header-title {
@@ -64,7 +73,10 @@ body {
     gap: 10px;
     padding: 15px;
     background: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 56px;
+    z-index: 99;
 }
 
 .search-input {
@@ -104,7 +116,26 @@ body {
     padding: 30px 20px;
     text-align: center;
     margin: 15px;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
 }
 
 .banner h2 {
@@ -127,18 +158,19 @@ body {
 
 .category-item {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 20px 10px;
     text-align: center;
     cursor: pointer;
-    transition: 0.3s;
+    transition: var(--transition);
     text-decoration: none;
     color: var(--text);
+    box-shadow: var(--shadow);
 }
 
 .category-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
 .category-icon {
@@ -174,16 +206,16 @@ body {
 
 .product-card {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    box-shadow: var(--shadow);
 }
 
 .product-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
 .product-image {
@@ -235,9 +267,14 @@ body {
 .section {
     background: white;
     margin: 15px;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     padding: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.section:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .section-title {
@@ -267,9 +304,29 @@ body {
     font-weight: 500;
     cursor: pointer;
     border: none;
-    transition: 0.3s;
+    transition: var(--transition);
     text-decoration: none;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
 }
 
 .btn-primary {
@@ -339,10 +396,16 @@ body {
 /* Card */
 .card {
     background: white;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     padding: 20px;
     margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
 /* Tabs */
@@ -383,6 +446,8 @@ body {
     padding: 10px 0;
     border-top: 1px solid var(--border);
     z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    backdrop-filter: blur(10px);
 }
 
 .nav-item {
@@ -523,7 +588,8 @@ body {
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: 0.3s;
+    transition: var(--transition);
+    backdrop-filter: blur(5px);
 }
 
 .modal-overlay.show {
@@ -533,16 +599,17 @@ body {
 
 .modal {
     background: white;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     padding: 30px;
     width: 90%;
     max-width: 400px;
-    transform: scale(0.9);
-    transition: 0.3s;
+    transform: scale(0.9) translateY(20px);
+    transition: var(--transition);
+    box-shadow: var(--shadow-lg);
 }
 
 .modal-overlay.show .modal {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
 }
 
 .modal-title {
@@ -564,3 +631,67 @@ body {
 .gap-10 { gap: 10px; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Selection */
+::selection {
+    background: var(--primary);
+    color: white;
+}
+
+/* Focus styles */
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .bottom-nav,
+    .search-bar,
+    .header {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+}

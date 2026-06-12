@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>装修案例 - 美家家装 | 真实装修效果图</title>
+    <meta name="description" content="美家家装精选装修案例，涵盖现代简约、北欧风格、新中式等多种装修风格，真实装修效果图，为您提供装修灵感。">
+    <meta name="keywords" content="装修案例,装修效果图,现代简约,北欧风格,新中式,装修灵感">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="装修案例 - 美家家装">
+    <meta property="og:description" content="精选装修案例，真实装修效果图，为您提供装修灵感。">
+    <meta property="og:type" content="website">
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff5000">
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="header-back">← 返回</a>
+        <div class="header-title">装修案例</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="filterCases('all')">全部</div>
+        <div class="tab" onclick="filterCases('modern')">现代简约</div>
+        <div class="tab" onclick="filterCases('nordic')">北欧风格</div>
+        <div class="tab" onclick="filterCases('chinese')">新中式</div>
+        <div class="tab" onclick="filterCases('luxury')">轻奢风格</div>
+    </div>
+
+    <div class="page-content">
+        <div class="section">
+            <div class="section-title">🏠 精选案例</div>
+            <div class="case-grid" id="caseGrid">
+                <!-- Case 1 -->
+                <div class="case-card" data-style="modern">
+                    <div class="case-image">
+                        <div class="case-placeholder">🛋️</div>
+                        <div class="case-badge">现代简约</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">三室两厅现代简约风格</div>
+                        <div class="case-meta">
+                            <span>120㎡</span>
+                            <span>3室2厅</span>
+                            <span>15万</span>
+                        </div>
+                        <div class="case-desc">整体以白色和原木色为主，简约而不简单，营造出温馨舒适的居住环境。</div>
+                        <div class="case-tags">
+                            <span class="tag">开放式厨房</span>
+                            <span class="tag">全屋定制</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 2 -->
+                <div class="case-card" data-style="nordic">
+                    <div class="case-image">
+                        <div class="case-placeholder">🌿</div>
+                        <div class="case-badge">北欧风格</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">两室一厅北欧清新风</div>
+                        <div class="case-meta">
+                            <span>85㎡</span>
+                            <span>2室1厅</span>
+                            <span>12万</span>
+                        </div>
+                        <div class="case-desc">以白色为基调，搭配原木家具和绿植，打造自然清新的北欧家居氛围。</div>
+                        <div class="case-tags">
+                            <span class="tag">原木家具</span>
+                            <span class="tag">绿植装饰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 3 -->
+                <div class="case-card" data-style="chinese">
+                    <div class="case-image">
+                        <div class="case-placeholder">🎋</div>
+                        <div class="case-badge">新中式</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">四室两厅新中式风格</div>
+                        <div class="case-meta">
+                            <span>150㎡</span>
+                            <span>4室2厅</span>
+                            <span>25万</span>
+                        </div>
+                        <div class="case-desc">融合传统中式元素与现代设计理念，营造出典雅大气的居住空间。</div>
+                        <div class="case-tags">
+                            <span class="tag">中式屏风</span>
+                            <span class="tag">实木家具</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 4 -->
+                <div class="case-card" data-style="luxury">
+                    <div class="case-image">
+                        <div class="case-placeholder">✨</div>
+                        <div class="case-badge">轻奢风格</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">复式楼轻奢风格设计</div>
+                        <div class="case-meta">
+                            <span>200㎡</span>
+                            <span>5室3厅</span>
+                            <span>45万</span>
+                        </div>
+                        <div class="case-desc">运用金属、大理石等材质，打造出低调奢华的现代家居空间。</div>
+                        <div class="case-tags">
+                            <span class="tag">大理石地面</span>
+                            <span class="tag">金属装饰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 5 -->
+                <div class="case-card" data-style="modern">
+                    <div class="case-image">
+                        <div class="case-placeholder">🏢</div>
+                        <div class="case-badge">现代简约</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">小户型现代简约改造</div>
+                        <div class="case-meta">
+                            <span>60㎡</span>
+                            <span>1室1厅</span>
+                            <span>8万</span>
+                        </div>
+                        <div class="case-desc">巧妙利用空间，打造出功能齐全的现代简约小户型。</div>
+                        <div class="case-tags">
+                            <span class="tag">空间利用</span>
+                            <span class="tag">多功能家具</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 6 -->
+                <div class="case-card" data-style="nordic">
+                    <div class="case-image">
+                        <div class="case-placeholder">🌊</div>
+                        <div class="case-badge">北欧风格</div>
+                    </div>
+                    <div class="case-info">
+                        <div class="case-title">海边别墅北欧风格</div>
+                        <div class="case-meta">
+                            <span>180㎡</span>
+                            <span>4室2厅</span>
+                            <span>35万</span>
+                        </div>
+                        <div class="case-desc">以蓝色和白色为主调，营造出海边度假的轻松氛围。</div>
+                        <div class="case-tags">
+                            <span class="tag">海景房</span>
+                            <span class="tag">度假风格</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📊 热门风格</div>
+            <div class="style-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">🎨</div>
+                    <div class="stat-name">现代简约</div>
+                    <div class="stat-count">1,234套</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 85%;"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🌿</div>
+                    <div class="stat-name">北欧风格</div>
+                    <div class="stat-count">986套</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 72%;"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🎋</div>
+                    <div class="stat-name">新中式</div>
+                    <div class="stat-count">756套</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 58%;"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">✨</div>
+                    <div class="stat-name">轻奢风格</div>
+                    <div class="stat-count">543套</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 42%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="pages/products.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="pages/post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="pages/orders.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="pages/profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <style>
+        .case-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .case-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .case-image {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .case-placeholder {
+            font-size: 64px;
+            opacity: 0.8;
+        }
+        
+        .case-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .case-info {
+            padding: 20px;
+        }
+        
+        .case-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .case-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .case-desc {
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .case-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .style-stats {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            display: grid;
+            grid-template-columns: 40px 1fr 80px;
+            grid-template-rows: auto auto;
+            gap: 5px 15px;
+            align-items: center;
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            grid-row: span 2;
+        }
+        
+        .stat-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .stat-count {
+            font-size: 12px;
+            color: var(--text-lighter);
+            text-align: right;
+        }
+        
+        .stat-bar {
+            grid-column: 2 / 4;
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .case-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .case-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+
+    <script>
+        function filterCases(style) {
+            const cases = document.querySelectorAll('.case-card');
+            const tabs = document.querySelectorAll('.tab');
+            
+            // Update active tab
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cases
+            cases.forEach(caseCard => {
+                if (style === 'all' || caseCard.dataset.style === style) {
+                    caseCard.style.display = 'block';
+                    caseCard.style.animation = 'fadeIn 0.5s ease-out';
+                } else {
+                    caseCard.style.display = 'none';
+                }
+            });
+        }
+        
+        // Animate stat bars on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const fills = entry.target.querySelectorAll('.stat-fill');
+                    fills.forEach(fill => {
+                        fill.style.width = fill.style.width;
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observer.observe(document.querySelector('.style-stats'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>户型设计 - 美家家装 | AI智能户型分析</title>
+    <meta name="description" content="上传户型图，AI智能分析户型结构，自动生成装修方案。支持多种户型模板，一键生成3D效果图。">
+    <meta name="keywords" content="户型设计,户型图,AI设计,装修方案,3D效果图">
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff5000">
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="header-back">← 返回</a>
+        <div class="header-title">户型设计</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('upload')">上传户型图</div>
+        <div class="tab" onclick="switchTab('template')">户型模板</div>
+        <div class="tab" onclick="switchTab('history')">历史记录</div>
+    </div>
+
+    <div class="page-content">
+        <!-- Upload Section -->
+        <div id="upload-section" class="section">
+            <div class="section-title">📤 上传户型图</div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击或拖拽上传户型图</div>
+                <div class="upload-hint">支持 JPG、PNG、PDF 格式，最大 10MB</div>
+                <input type="file" id="fileInput" accept="image/*,.pdf" style="display: none;">
+            </div>
+            
+            <div class="upload-options">
+                <div class="option-group">
+                    <div class="option-title">🏠 户型信息</div>
+                    <div class="form-group">
+                        <label class="form-label">户型</label>
+                        <select class="form-input" id="roomType">
+                            <option value="">请选择户型</option>
+                            <option value="1室1厅">1室1厅</option>
+                            <option value="2室1厅">2室1厅</option>
+                            <option value="2室2厅">2室2厅</option>
+                            <option value="3室1厅">3室1厅</option>
+                            <option value="3室2厅">3室2厅</option>
+                            <option value="4室2厅">4室2厅</option>
+                            <option value="复式">复式</option>
+                            <option value="别墅">别墅</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">面积 (㎡)</label>
+                        <input type="number" class="form-input" id="area" placeholder="请输入面积">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">装修风格</label>
+                        <select class="form-input" id="style">
+                            <option value="">请选择风格</option>
+                            <option value="现代简约">现代简约</option>
+                            <option value="北欧风格">北欧风格</option>
+                            <option value="新中式">新中式</option>
+                            <option value="轻奢风格">轻奢风格</option>
+                            <option value="美式风格">美式风格</option>
+                            <option value="日式风格">日式风格</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">🎨 设计偏好</div>
+                    <div class="preference-tags">
+                        <div class="preference-tag" onclick="togglePreference(this)">开放式厨房</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">干湿分离</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">步入式衣帽间</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">书房</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">儿童房</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">老人房</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">储物间</div>
+                        <div class="preference-tag" onclick="togglePreference(this)">阳台花园</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary btn-block mt-20" onclick="startDesign()">
+                🚀 开始AI设计
+            </button>
+        </div>
+
+        <!-- Template Section -->
+        <div id="template-section" class="section" style="display: none;">
+            <div class="section-title">🏠 户型模板</div>
+            <div class="template-grid">
+                <div class="template-card" onclick="selectTemplate('1室1厅')">
+                    <div class="template-icon">🏢</div>
+                    <div class="template-name">1室1厅</div>
+                    <div class="template-size">60-80㎡</div>
+                    <div class="template-desc">适合单身或情侣</div>
+                </div>
+                <div class="template-card" onclick="selectTemplate('2室1厅')">
+                    <div class="template-icon">🏠</div>
+                    <div class="template-name">2室1厅</div>
+                    <div class="template-size">80-100㎡</div>
+                    <div class="template-desc">适合小家庭</div>
+                </div>
+                <div class="template-card" onclick="selectTemplate('3室2厅')">
+                    <div class="template-icon">🏡</div>
+                    <div class="template-name">3室2厅</div>
+                    <div class="template-size">100-130㎡</div>
+                    <div class="template-desc">适合三代同堂</div>
+                </div>
+                <div class="template-card" onclick="selectTemplate('复式')">
+                    <div class="template-icon">🏘️</div>
+                    <div class="template-name">复式</div>
+                    <div class="template-size">150-200㎡</div>
+                    <div class="template-desc">上下两层空间</div>
+                </div>
+                <div class="template-card" onclick="selectTemplate('别墅')">
+                    <div class="template-icon">🏰</div>
+                    <div class="template-name">别墅</div>
+                    <div class="template-size">200㎡+</div>
+                    <div class="template-desc">独立庭院空间</div>
+                </div>
+                <div class="template-card" onclick="selectTemplate('loft')">
+                    <div class="template-icon">🏗️</div>
+                    <div class="template-name">LOFT</div>
+                    <div class="template-size">40-60㎡</div>
+                    <div class="template-desc">挑高空间设计</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="history-section" class="section" style="display: none;">
+            <div class="section-title">📋 历史记录</div>
+            <div class="history-list">
+                <div class="history-item">
+                    <div class="history-icon">📐</div>
+                    <div class="history-info">
+                        <div class="history-title">3室2厅 - 现代简约</div>
+                        <div class="history-meta">120㎡ | 2024-01-15</div>
+                    </div>
+                    <div class="history-status">已完成</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-icon">📐</div>
+                    <div class="history-info">
+                        <div class="history-title">2室1厅 - 北欧风格</div>
+                        <div class="history-meta">85㎡ | 2024-01-10</div>
+                    </div>
+                    <div class="history-status">设计中</div>
+                </div>
+                <div class="history-empty">
+                    <div class="empty-icon">📭</div>
+                    <p>暂无更多历史记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="pages/products.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="pages/post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="pages/orders.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="pages/profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <style>
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg);
+        }
+        
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .upload-hint {
+            font-size: 13px;
+            color: var(--text-lighter);
+        }
+        
+        .upload-options {
+            margin-top: 25px;
+        }
+        
+        .option-group {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .option-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .preference-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .preference-tag {
+            padding: 10px 18px;
+            background: white;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        
+        .preference-tag:hover,
+        .preference-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .template-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .template-card:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .template-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .template-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .template-size {
+            font-size: 13px;
+            color: var(--text-lighter);
+            margin-bottom: 8px;
+        }
+        
+        .template-desc {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .history-list {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .history-item:hover {
+            background: var(--primary-light);
+        }
+        
+        .history-icon {
+            font-size: 32px;
+        }
+        
+        .history-info {
+            flex: 1;
+        }
+        
+        .history-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .history-meta {
+            font-size: 12px;
+            color: var(--text-lighter);
+        }
+        
+        .history-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .history-status:contains('已完成') {
+            background: #e6f7e6;
+            color: #52c41a;
+        }
+        
+        .history-status:contains('设计中') {
+            background: #fff7e6;
+            color: #faad14;
+        }
+        
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-lighter);
+        }
+        
+        @media (min-width: 768px) {
+            .template-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .template-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(tabName + '-section').style.display = 'block';
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            
+            if (file.size > maxSize) {
+                showToast('文件大小不能超过10MB');
+                return;
+            }
+            
+            if (!allowedTypes.includes(file.type)) {
+                showToast('只支持 JPG、PNG、GIF、PDF 格式');
+                return;
+            }
+            
+            // Update upload area
+            const uploadIcon = uploadArea.querySelector('.upload-icon');
+            const uploadText = uploadArea.querySelector('.upload-text');
+            
+            uploadIcon.textContent = '✅';
+            uploadText.textContent = file.name;
+            
+            showToast('文件上传成功');
+        }
+        
+        // Preference toggle
+        function togglePreference(element) {
+            element.classList.toggle('active');
+        }
+        
+        // Template selection
+        function selectTemplate(templateName) {
+            document.getElementById('roomType').value = templateName;
+            switchTab('upload');
+            showToast(`已选择 ${templateName} 模板`);
+        }
+        
+        // Start design
+        function startDesign() {
+            const roomType = document.getElementById('roomType').value;
+            const area = document.getElementById('area').value;
+            const style = document.getElementById('style').value;
+            
+            if (!roomType) {
+                showToast('请选择户型');
+                return;
+            }
+            
+            if (!area) {
+                showToast('请输入面积');
+                return;
+            }
+            
+            if (!style) {
+                showToast('请选择装修风格');
+                return;
+            }
+            
+            // Get selected preferences
+            const preferences = [];
+            document.querySelectorAll('.preference-tag.active').forEach(tag => {
+                preferences.push(tag.textContent);
+            });
+            
+            // Show loading
+            showToast('正在生成AI设计方案...');
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                showToast('设计方案生成完成！');
+                // In real app, redirect to design result page
+            }, 2000);
+        }
+        
+        // Toast notification
+        function showToast(message, duration = 2000) {
+            let toast = document.querySelector('.toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+    </script>
+</body>
+</html>

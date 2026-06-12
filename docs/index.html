@@ -2,9 +2,68 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>美家家装 - 首页</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>美家家装 - AI智能装修设计平台 | 专业家装服务</title>
+    <meta name="description" content="美家家装是AI驱动的智能装修平台，提供户型设计、材料选购、施工监理一站式服务。上传户型图，30秒生成3套装修方案。">
+    <meta name="keywords" content="家装,装修,室内设计,AI设计,户型设计,装修材料,瓷砖,卫浴,灯具,全屋定制">
+    <meta name="author" content="美家家装">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://c77-deep.github.io/Mei-mei-jia-zhuang/">
+    <meta property="og:title" content="美家家装 - AI智能装修设计平台">
+    <meta property="og:description" content="上传户型图，30秒生成3套装修方案。专业家装服务，一站式解决装修难题。">
+    <meta property="og:image" content="https://c77-deep.github.io/Mei-mei-jia-zhuang/images/og-image.jpg">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://c77-deep.github.io/Mei-mei-jia-zhuang/">
+    <meta property="twitter:title" content="美家家装 - AI智能装修设计平台">
+    <meta property="twitter:description" content="上传户型图，30秒生成3套装修方案。专业家装服务，一站式解决装修难题。">
+    <meta property="twitter:image" content="https://c77-deep.github.io/Mei-mei-jia-zhuang/images/og-image.jpg">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "美家家装",
+      "url": "https://c77-deep.github.io/Mei-mei-jia-zhuang/",
+      "description": "AI驱动的智能装修平台",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://c77-deep.github.io/Mei-mei-jia-zhuang/pages/products.html?keyword={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://c77-deep.github.io/Mei-mei-jia-zhuang/">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="js/api.js" as="script">
 </head>
 <body>
     <div class="header">
@@ -58,6 +117,22 @@
             <span class="category-icon">🍳</span>
             <span class="category-name">厨房电器</span>
         </a>
+        <a href="pages/floor-plan.html" class="category-item">
+            <span class="category-icon">📐</span>
+            <span class="category-name">户型设计</span>
+        </a>
+        <a href="pages/cases.html" class="category-item">
+            <span class="category-icon">🏠</span>
+            <span class="category-name">装修案例</span>
+        </a>
+        <a href="pages/ai-design.html" class="category-item">
+            <span class="category-icon">🤖</span>
+            <span class="category-name">AI设计</span>
+        </a>
+        <a href="pages/calculator.html" class="category-item">
+            <span class="category-icon">💰</span>
+            <span class="category-name">装修报价</span>
+        </a>
     </div>
 
     <div class="section">
@@ -86,7 +161,24 @@
                 <span class="category-icon">📋</span>
                 <span class="category-name">我的订单</span>
             </a>
+            <a href="pages/cases.html" class="category-item">
+                <span class="category-icon">🏠</span>
+                <span class="category-name">装修案例</span>
+            </a>
+            <a href="pages/ai-design.html" class="category-item">
+                <span class="category-icon">🤖</span>
+                <span class="category-name">AI设计</span>
+            </a>
+            <a href="pages/floor-plan.html" class="category-item">
+                <span class="category-icon">📐</span>
+                <span class="category-name">户型设计</span>
+            </a>
+            <a href="pages/3d-preview.html" class="category-item">
+                <span class="category-icon">🏗️</span>
+                <span class="category-name">3D预览</span>
+            </a>
         </div>
+    </div>
     </div>
 
     <div class="bottom-nav">
@@ -154,6 +246,9 @@
             if (user) {
                 btn.textContent = user.nickname || user.username;
                 btn.href = 'pages/profile.html';
+            } else {
+                btn.textContent = '登录';
+                btn.href = 'pages/login.html';
             }
         }
 

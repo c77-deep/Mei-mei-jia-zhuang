@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+
+Sitemap: https://c77-deep.github.io/Mei-mei-jia-zhuang/sitemap.xml
+
+# 允许搜索引擎抓取所有页面
+User-agent: Googlebot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Bingbot
+Allow: /

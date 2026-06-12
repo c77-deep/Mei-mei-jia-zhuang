@@ -145,7 +145,12 @@
 
             const result = await api.login(username, password);
             if (result.success) {
-                saveAuth(result.token, result.user);
+                // 本地存储模式
+                if (result.data) {
+                    saveAuth(result.data.token, result.data.user);
+                } else {
+                    saveAuth(result.token, result.user);
+                }
                 showToast('登录成功');
                 setTimeout(() => window.location.href = '../index.html', 1000);
             } else {
@@ -176,9 +181,9 @@
 
             const result = await api.register(username, phone, password);
             if (result.success) {
-                saveAuth(result.token, result.user);
-                showToast('注册成功');
-                setTimeout(() => window.location.href = '../index.html', 1000);
+                showToast('注册成功，请登录');
+                switchTab('login');
+                document.getElementById('loginUsername').value = username;
             } else {
                 showToast(result.message);
             }

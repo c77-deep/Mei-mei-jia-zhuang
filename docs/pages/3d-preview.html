@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>3D设计预览 - 美家家装 | 在线3D效果图</title>
+    <meta name="description" content="在线3D装修效果预览，360度全景查看装修方案，支持VR模式，让您提前感受未来家的样子。">
+    <meta name="keywords" content="3D设计,3D效果图,装修预览,VR看房,全景图">
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff5000">
+    
+    <!-- Three.js for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="header-back">← 返回</a>
+        <div class="header-title">3D设计预览</div>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchView('3d')">3D视图</div>
+        <div class="tab" onclick="switchView('panorama')">全景图</div>
+        <div class="tab" onclick="switchView('vr')">VR模式</div>
+    </div>
+
+    <div class="page-content">
+        <!-- 3D View Section -->
+        <div id="3d-section" class="section">
+            <div class="section-title">🏠 3D户型预览</div>
+            <div class="preview-container">
+                <div class="preview-3d" id="preview3d">
+                    <div class="preview-placeholder">
+                        <div class="placeholder-icon">🏗️</div>
+                        <div class="placeholder-text">3D预览区域</div>
+                        <div class="placeholder-hint">上传户型图后，AI将自动生成3D模型</div>
+                    </div>
+                    <canvas id="canvas3d" style="display: none;"></canvas>
+                </div>
+                <div class="preview-controls">
+                    <button class="control-btn" onclick="rotateLeft()">◀</button>
+                    <button class="control-btn" onclick="resetView()">🔄</button>
+                    <button class="control-btn" onclick="rotateRight()">▶</button>
+                    <button class="control-btn" onclick="zoomIn()">➕</button>
+                    <button class="control-btn" onclick="zoomOut()">➖</button>
+                </div>
+            </div>
+            
+            <div class="view-options">
+                <div class="option-group">
+                    <div class="option-title">🎨 视图模式</div>
+                    <div class="option-buttons">
+                        <button class="option-btn active" onclick="setViewMode('wireframe')">线框图</button>
+                        <button class="option-btn" onclick="setViewMode('solid')">实体图</button>
+                        <button class="option-btn" onclick="setViewMode('textured')">材质图</button>
+                        <button class="option-btn" onclick="setViewMode('lighting')">光照图</button>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-title">🔧 显示设置</div>
+                    <div class="setting-item">
+                        <span>显示尺寸</span>
+                        <label class="switch">
+                            <input type="checkbox" id="showDimensions" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>显示家具</span>
+                        <label class="switch">
+                            <input type="checkbox" id="showFurniture" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>显示灯光</span>
+                        <label class="switch">
+                            <input type="checkbox" id="showLighting">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panorama Section -->
+        <div id="panorama-section" class="section" style="display: none;">
+            <div class="section-title">🌍 全景效果图</div>
+            <div class="panorama-viewer">
+                <div class="panorama-placeholder">
+                    <div class="placeholder-icon">🌐</div>
+                    <div class="placeholder-text">全景效果图</div>
+                    <div class="placeholder-hint">360度全景查看装修效果</div>
+                </div>
+            </div>
+            <div class="panorama-controls">
+                <button class="btn btn-outline btn-sm" onclick="toggleAutoRotate()">自动旋转</button>
+                <button class="btn btn-outline btn-sm" onclick="toggleFullscreen()">全屏</button>
+                <button class="btn btn-outline btn-sm" onclick="sharePanorama()">分享</button>
+            </div>
+        </div>
+
+        <!-- VR Section -->
+        <div id="vr-section" class="section" style="display: none;">
+            <div class="section-title">🥽 VR看房</div>
+            <div class="vr-container">
+                <div class="vr-placeholder">
+                    <div class="placeholder-icon">🥽</div>
+                    <div class="placeholder-text">VR看房模式</div>
+                    <div class="placeholder-hint">使用VR设备或手机陀螺仪查看</div>
+                </div>
+                <div class="vr-tips">
+                    <div class="tip-item">📱 手机用户：开启陀螺仪后，转动手机查看</div>
+                    <div class="tip-item">🥽 VR用户：连接VR设备后，点击进入VR模式</div>
+                    <div class="tip-item">💻 电脑用户：使用鼠标拖拽查看</div>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block mt-20" onclick="enterVR()">
+                进入VR模式
+            </button>
+        </div>
+
+        <!-- Room List -->
+        <div class="section">
+            <div class="section-title">🚪 房间列表</div>
+            <div class="room-list">
+                <div class="room-item active" onclick="selectRoom('living')">
+                    <div class="room-icon">🛋️</div>
+                    <div class="room-info">
+                        <div class="room-name">客厅</div>
+                        <div class="room-size">35㎡</div>
+                    </div>
+                    <div class="room-check">✓</div>
+                </div>
+                <div class="room-item" onclick="selectRoom('master')">
+                    <div class="room-icon">🛏️</div>
+                    <div class="room-info">
+                        <div class="room-name">主卧</div>
+                        <div class="room-size">20㎡</div>
+                    </div>
+                    <div class="room-check"></div>
+                </div>
+                <div class="room-item" onclick="selectRoom('second')">
+                    <div class="room-icon">🛏️</div>
+                    <div class="room-info">
+                        <div class="room-name">次卧</div>
+                        <div class="room-size">15㎡</div>
+                    </div>
+                    <div class="room-check"></div>
+                </div>
+                <div class="room-item" onclick="selectRoom('kitchen')">
+                    <div class="room-icon">🍳</div>
+                    <div class="room-info">
+                        <div class="room-name">厨房</div>
+                        <div class="room-size">12㎡</div>
+                    </div>
+                    <div class="room-check"></div>
+                </div>
+                <div class="room-item" onclick="selectRoom('bathroom')">
+                    <div class="room-icon">🚿</div>
+                    <div class="room-info">
+                        <div class="room-name">卫生间</div>
+                        <div class="room-size">8㎡</div>
+                    </div>
+                    <div class="room-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="pages/products.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>商城</span>
+        </a>
+        <a href="pages/post-demand.html" class="nav-item">
+            <div class="nav-add">+</div>
+            <span style="margin-top: 5px;">发布</span>
+        </a>
+        <a href="pages/orders.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>订单</span>
+        </a>
+        <a href="pages/profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <style>
+        .preview-container {
+            position: relative;
+        }
+        
+        .preview-3d {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .placeholder-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .placeholder-hint {
+            font-size: 13px;
+            color: var(--text-lighter);
+        }
+        
+        .preview-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: var(--bg);
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .control-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .view-options {
+            margin-top: 20px;
+        }
+        
+        .option-group {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .option-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        
+        .option-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .option-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .option-btn:hover,
+        .option-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .panorama-viewer {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #e8f4f8, #d1ecf1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .panorama-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .vr-container {
+            text-align: center;
+        }
+        
+        .vr-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f0e6ff, #e6d5ff);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .vr-tips {
+            text-align: left;
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 15px;
+        }
+        
+        .tip-item {
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--text-light);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tip-item:last-child {
+            border-bottom: none;
+        }
+        
+        .room-list {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .room-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .room-item:hover {
+            background: var(--primary-light);
+        }
+        
+        .room-item.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .room-icon {
+            font-size: 32px;
+        }
+        
+        .room-info {
+            flex: 1;
+        }
+        
+        .room-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .room-size {
+            font-size: 13px;
+            color: var(--text-lighter);
+        }
+        
+        .room-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .room-item.active .room-check {
+            opacity: 1;
+        }
+        
+        @media (min-width: 768px) {
+            .preview-3d {
+                height: 400px;
+            }
+            
+            .panorama-viewer {
+                height: 350px;
+            }
+        }
+    </style>
+
+    <script>
+        // View switching
+        function switchView(viewName) {
+            // Hide all sections
+            document.querySelectorAll('[id$="-section"]').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(viewName + '-section').style.display = 'block';
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // 3D controls
+        let rotation = 0;
+        let zoom = 1;
+        
+        function rotateLeft() {
+            rotation -= 15;
+            updatePreview();
+        }
+        
+        function rotateRight() {
+            rotation += 15;
+            updatePreview();
+        }
+        
+        function resetView() {
+            rotation = 0;
+            zoom = 1;
+            updatePreview();
+        }
+        
+        function zoomIn() {
+            zoom = Math.min(zoom + 0.1, 2);
+            updatePreview();
+        }
+        
+        function zoomOut() {
+            zoom = Math.max(zoom - 0.1, 0.5);
+            updatePreview();
+        }
+        
+        function updatePreview() {
+            const preview = document.getElementById('preview3d');
+            preview.style.transform = `rotate(${rotation}deg) scale(${zoom})`;
+        }
+        
+        // View mode
+        function setViewMode(mode) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            showToast(`已切换到${mode}模式`);
+        }
+        
+        // Room selection
+        function selectRoom(roomId) {
+            document.querySelectorAll('.room-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            showToast(`正在查看${event.currentTarget.querySelector('.room-name').textContent}`);
+        }
+        
+        // Panorama controls
+        function toggleAutoRotate() {
+            showToast('自动旋转已开启');
+        }
+        
+        function toggleFullscreen() {
+            showToast('已进入全屏模式');
+        }
+        
+        function sharePanorama() {
+            showToast('分享链接已复制');
+        }
+        
+        // VR mode
+        function enterVR() {
+            showToast('正在进入VR模式...');
+        }
+        
+        // Toast notification
+        function showToast(message, duration = 2000) {
+            let toast = document.querySelector('.toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+        
+        // Initialize 3D scene (simplified example)
+        function init3D() {
+            const canvas = document.getElementById('canvas3d');
+            const placeholder = document.querySelector('.preview-placeholder');
+            
+            // Check if Three.js is loaded
+            if (typeof THREE !== 'undefined') {
+                // Create simple 3D scene
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+                
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                renderer.setClearColor(0xf5f5f5);
+                
+                // Add a simple cube as placeholder
+                const geometry = new THREE.BoxGeometry(1, 1, 1);
+                const material = new THREE.MeshBasicMaterial({ color: 0xff5000, wireframe: true });
+                const cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+                
+                camera.position.z = 2;
+                
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    cube.rotation.x += 0.01;
+                    cube.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                
+                animate();
+                
+                // Show canvas, hide placeholder
+                canvas.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init3D);
+    </script>
+</body>
+</html>
